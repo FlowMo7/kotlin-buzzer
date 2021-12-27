@@ -121,6 +121,12 @@ fun Application.configure(
                     h3 { +"Buzzer (Participant)" }
                     br()
 
+                    span {
+                        id = "connection_status"
+                        style = "color: red;"
+                    }
+                    br()
+
                     p {
                         +"Your nickname:"
                         unsafe { +"&nbsp;" }
@@ -157,6 +163,11 @@ fun Application.configure(
                 body {
                     h3 { +"Buzzer (Host)" }
                     br()
+
+                    span {
+                        id = "connection_status"
+                        style = "color: red;"
+                    }
 
                     div {
                         id = "lobby_code"

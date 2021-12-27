@@ -1,9 +1,10 @@
 var socket;
 
-function connectToWebsocket(webSocketUrl, onMessageReceived) {
+function connectToWebsocket(webSocketUrl, onMessageReceived, onConnectionStateChanged) {
     socket = new WebSocket(webSocketUrl);
     socket.onopen = function (e) {
         console.log("[open] Connection established");
+        onConnectionStateChanged(true);
     };
 
     socket.onmessage = function (event) {
@@ -17,11 +18,13 @@ function connectToWebsocket(webSocketUrl, onMessageReceived) {
         } else {
             console.log('[close] Connection died');
         }
+        onConnectionStateChanged(false);
         // connectToWebsocket(webSocketUrl);    //TODO
     };
 
     socket.onerror = function (error) {
         console.log('[error] ' + error.message);
+        onConnectionStateChanged(false);
         connectToWebsocket(webSocketUrl);
     };
 }
@@ -32,12 +35,19 @@ function host(pathPrefix, lobbyCode) {
         function (data) {
             console.log(data)
             var text = '<ul>'
-            var payload = JSON.parse(data);
+            let payload = JSON.parse(data);
             payload.participants.forEach(function (item) {
                 text += '<li>' + item.name + ' (' + item.buzzed + ')</li>';
             })
             text += '</ul>';
             document.getElementById('participant_list').innerHTML = text
+        },
+        function (isConnected) {
+            if (isConnected) {
+                document.getElementById('connection_status').innerHTML = '';
+            } else {
+                document.getElementById('connection_status').innerHTML = 'Not connected. You will not get updates on buzzes. Please try refreshing this page.';
+            }
         }
     );
 }
@@ -47,6 +57,13 @@ function participant(pathPrefix, lobbyCode) {
         pathPrefix + '/ws/feed/' + lobbyCode + '?nickname=' + getParameterByName('nickname'),
         function (data) {
             console.log(data)
+        },
+        function (isConnected) {
+            if (isConnected) {
+                document.getElementById('connection_status').innerHTML = '';
+            } else {
+                document.getElementById('connection_status').innerHTML = 'Not connected. Your buzzes will not count. Please try refreshing this page.';
+            }
         }
     );
 }
