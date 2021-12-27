@@ -17,6 +17,7 @@ fun Application.configure(
     routing {
 
         get {
+            val lobbyIdQueryParameter = call.request.queryParameters["lobbyCode"]
             call.respondHtml {
                 head {
                     meta(charset = "utf-8")
@@ -24,30 +25,55 @@ fun Application.configure(
                     script(type = "text/javascript", src = "/static/websocket.js") {
 
                     }
+                    link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
                 }
                 body {
-                    h3 { +"Buzzer" }
-                    br()
-
-                    div {
-                        form(action = "/create", method = FormMethod.post) {
-                            +"Create new lobby"
-                            submitInput()
+                    main {
+                        div(classes = "header") {
+                            h3 { +"Buzzer" }
                         }
-                    }
 
-                    br()
-                    br()
-                    br()
-
-                    div {
-                        form(action = "/join", method = FormMethod.post) {
-                            +"Join a Lobby:"
-                            br()
-                            textInput(name = "lobbyCode") {
-
+                        if (lobbyIdQueryParameter.isNullOrBlank()) {
+                            div {
+                                form(action = "/create", method = FormMethod.post) {
+                                    +"Create new lobby"
+                                    submitInput()
+                                }
                             }
-                            submitInput()
+
+                            br()
+                            br()
+                            br()
+                        }
+
+                        div {
+                            form(action = "/join", method = FormMethod.post) {
+
+                                if (lobbyIdQueryParameter.isNullOrBlank()) {
+                                    +"Join a Lobby:"
+                                    br()
+                                    textInput(name = "lobbyCode") {
+                                        placeholder = "Lobby-Code"
+                                    }
+                                    br()
+                                    textInput(name = "nickname") {
+                                        placeholder = "Nickname"
+                                    }
+                                    submitInput()
+                                } else {
+                                    +"Enter a nickname to join the lobby:"
+                                    br()
+                                    textInput(name = "nickname") {
+                                        placeholder = "Nickname"
+                                    }
+
+                                    hiddenInput(name = "lobbyCode") {
+                                        value = lobbyIdQueryParameter
+                                    }
+
+                                    submitInput()
+                                }
+                            }
                         }
                     }
                 }
@@ -56,99 +82,113 @@ fun Application.configure(
 
         post("create") {
             val lobbyCode = buzzingSessionManager.createNewLobby()
-            call.respondRedirect(url = "/lobby/$lobbyCode/admin", permanent = false)
+            call.respondRedirect(url = "/host/$lobbyCode", permanent = false)
         }
 
         post("join") {
-            val lobbyCode = try {
+            val (lobbyCode, nickname) = try {
                 val parameters = call.receiveParameters()
-                parameters["lobbyCode"]
+                parameters["lobbyCode"]!! to parameters["nickname"]
             } catch (throwable: Throwable) {
                 throwable.printStackTrace()
-                null
+                null to null
             }
             if (lobbyCode != null) {
-                call.respondRedirect(url = "/lobby/$lobbyCode", permanent = false)
+                call.respondRedirect(url = "/lobby/$lobbyCode?nickname=$nickname", permanent = false)
             } else {
                 call.respondRedirect(url = "/", permanent = false)
             }
         }
 
-        route("lobby/{lobbyId}") {
+        get("lobby/{lobbyId}") {
+            val lobbyId = requireNotNull(call.parameters["lobbyId"]) { "lobbyId not set in path" }
+            val nickname =
+                requireNotNull(call.request.queryParameters["nickname"]) { "nickname not set in query parameters" }
 
-            get {
-                val lobbyId = requireNotNull(call.parameters["lobbyId"]) { "lobbyId not set in path" }
-                call.respondHtml {
-                    head {
-                        meta(charset = "utf-8")
-                        title("Buzzer")
-                        script(type = "text/javascript", src = "/static/websocket.js") {
+            call.respondHtml {
+                head {
+                    meta(charset = "utf-8")
+                    title("Buzzer")
+                    script(type = "text/javascript", src = "/static/websocket.js") {
+                    }
 
-                        }
+                    script(type = "text/javascript") {
+                        +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyId'); };"
+                    }
+                    link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
+                }
+                body {
+                    h3 { +"Buzzer (Participant)" }
+                    br()
 
-                        script(type = "text/javascript") {
-                            +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyId'); };"
+                    p {
+                        +"Your nickname:"
+                        unsafe { +"&nbsp;" }
+                        i {
+                            +nickname
                         }
                     }
-                    body {
-                        h3 { +"Buzzer (Participant)" }
-                        br()
 
-                        div {
-                            +"Lobby: $lobbyId"
-                        }
-                        br()
-                        p {
-                            +"Username:"
-                            br()
-                            textInput() {
-                                id = "username"
-                            }
-                        }
-                        br()
-                        p {
-                            button {
-                                onClick = "sendBuzz('${if (isSecure) "wss" else "ws"}://${publicHostname}', document.getElementById('username').value, '$lobbyId');"
-                                +"Buzz"
-                            }
+                    div {
+                        button(classes = "buzzer") {
+                            onClick = "sendBuzz();"
+                            +"Buzz"
                         }
                     }
                 }
             }
+        }
 
-            get("admin") {
-                val lobbyId = requireNotNull(call.parameters["lobbyId"]) { "lobbyId not set in path" }
-                call.respondHtml {
-                    head {
-                        meta(charset = "utf-8")
-                        title("Buzzer Admin")
-                        script(type = "text/javascript", src = "/static/websocket.js") {
+        get("host/{lobbyCode}") {
+            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyId not set in path" }
+            call.respondHtml {
+                head {
+                    meta(charset = "utf-8")
+                    title("Buzzer Host")
+                    script(type = "text/javascript", src = "/static/websocket.js") {
 
-                        }
-
-                        script(type = "text/javascript") {
-                            +"window.onload = function() { admin('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyId'); };"
-                        }
                     }
-                    body {
-                        h3 { +"Buzzer (Admin)" }
-                        br()
 
-                        div {
-                            +"Lobby: $lobbyId"
-                        }
+                    script(type = "text/javascript") {
+                        +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
+                    }
+                    link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
+                }
+                body {
+                    h3 { +"Buzzer (Host)" }
+                    br()
 
-                        div {
-                            id = "participant_list"
-                        }
+                    div {
+                        id = "lobby_code"
+                        +"Lobby-Code: $lobbyCode"
+                    }
 
+                    div {
+                        +"Link to join this lobby:"
                         br()
-                        br()
-                        div {
-                            button {
-                                onClick = "resetBuzzes('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyId');"
-                                +"Reset Buzzes"
+                        val lobbyJoinUrl = buildString {
+                            if (isSecure) {
+                                append("https://")
+                            } else {
+                                append("http://")
                             }
+                            append(publicHostname)
+                            append("/?lobbyCode=$lobbyCode")
+                        }
+                        a(href = lobbyJoinUrl) { +lobbyJoinUrl }
+                    }
+                    br()
+
+                    div {
+                        id = "participant_list"
+                    }
+
+                    br()
+                    br()
+                    div {
+                        button {
+                            onClick = "resetBuzzes();"
+                            +"Reset Buzzes"
                         }
                     }
                 }

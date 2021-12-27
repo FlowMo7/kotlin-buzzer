@@ -4,9 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class IncomingMessage(
-    val type: Type,
-    val lobbyCode: String,
-    val participant: String? = null
+    val type: Type
 ) {
     enum class Type {
         Buzz, Clear

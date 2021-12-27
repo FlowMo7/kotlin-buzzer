@@ -26,9 +26,9 @@ function connectToWebsocket(webSocketUrl, onMessageReceived) {
     };
 }
 
-function admin(pathPrefix, lobbyCode) {
+function host(pathPrefix, lobbyCode) {
     connectToWebsocket(
-        pathPrefix + '/ws/feed/' + lobbyCode,
+        pathPrefix + '/ws/host/' + lobbyCode,
         function (data) {
             console.log(data)
             var text = '<ul>'
@@ -44,25 +44,22 @@ function admin(pathPrefix, lobbyCode) {
 
 function participant(pathPrefix, lobbyCode) {
     connectToWebsocket(
-        pathPrefix + '/ws/feed/' + lobbyCode,
+        pathPrefix + '/ws/feed/' + lobbyCode + '?nickname=' + getParameterByName('nickname'),
         function (data) {
             console.log(data)
         }
     );
 }
 
-function sendBuzz(pathPrefix, participantName, lobbyCode) {
+function sendBuzz() {
     socket.send(JSON.stringify({
-        type: 'Buzz',
-        lobbyCode: lobbyCode,
-        participant: participantName
+        type: 'Buzz'
     }));
 }
 
-function resetBuzzes(pathPrefix, lobbyCode) {
+function resetBuzzes() {
     socket.send(JSON.stringify({
-        type: 'Clear',
-        lobbyCode: lobbyCode
+        type: 'Clear'
     }));
 }
 
@@ -78,3 +75,14 @@ function resetBuzzes(pathPrefix, lobbyCode) {
 // setInterval(function() {
 //     checkWebSocketConnectionAlive();
 // }, 5000);
+
+
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+

@@ -57,6 +57,45 @@ class BuzzingSessionManager {
         return getOrAddBuzzingSessionStateFlow(id).asStateFlow()
     }
 
+    suspend fun onParticipantEntered(id: String, nickname: String) {
+        println("onParticipantEntered($id, $nickname)")
+        val flow = getOrAddBuzzingSessionStateFlow(id)
+        flowMutationMutex.withLock {
+            flow.value = flow.value.let { currentState ->
+                currentState.copy(
+                    participantsState = currentState.participantsState
+                        .toMutableList()
+                        .let { list ->
+                            if (list.any { it.name == nickname }) {
+                                //already in list
+                                list
+                            } else {
+                                val indexToInsertAt = list.lastIndex + 1
+                                list.add(
+                                    indexToInsertAt,
+                                    BuzzingSessionData.ParticipantState(indexToInsertAt, nickname, false)
+                                )
+                                list
+                            }
+                        }
+                )
+            }
+        }
+    }
+
+    suspend fun onParticipantLeft(id: String, nickname: String) {
+        println("onParticipantLeft($id, $nickname)")
+        val flow = getOrAddBuzzingSessionStateFlow(id)
+        flowMutationMutex.withLock {
+            flow.value = flow.value.let { currentState ->
+                currentState.copy(
+                    participantsState = currentState.participantsState
+                        .filterNot { it.name == nickname }
+                )
+            }
+        }
+    }
+
     suspend fun createNewLobby(): String {
         println("createNewLobby()")
         return getNewLobbyCode()

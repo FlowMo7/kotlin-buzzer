@@ -17,12 +17,16 @@ import kotlinx.serialization.json.Json
 fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSessionManager) {
     routing {
         route("ws") {
+
             webSocket("feed/{id}") {
+
                 val id = requireNotNull(call.parameters["id"]) { "path parameter {id} not set" }
+                val nickname =
+                    requireNotNull(call.request.queryParameters["nickname"]) { "query parameter {nickname} not set" }
+
+                buzzingSessionManager.onParticipantEntered(id = id, nickname = nickname)
                 buzzingSessionManager.getBuzzerFlow(id = id)
                     .onEach { buzzingSessionData ->
-                        println("received a data update from buzzingSessionManager: $buzzingSessionData")
-
                         val apiModel = BuzzerData(
                             id = buzzingSessionData.id,
                             participants = buzzingSessionData.participantsState.map { participantState ->
@@ -42,25 +46,69 @@ fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSes
                     when (frame) {
                         is Frame.Text -> {
                             val receivedText = frame.readText()
-                            println("received text-frame: $receivedText")
                             val incomingMessage = json.decodeFromString(IncomingMessage.serializer(), receivedText)
                             when (incomingMessage.type) {
                                 IncomingMessage.Type.Buzz -> {
                                     buzzingSessionManager.addBuzz(
-                                        id = incomingMessage.lobbyCode,
-                                        participantName = requireNotNull(incomingMessage.participant) { "participant" }
+                                        id = id,
+                                        participantName = nickname
                                     )
                                 }
                                 IncomingMessage.Type.Clear -> {
-                                    buzzingSessionManager.clearBuzzes(
-                                        id = incomingMessage.lobbyCode
-                                    )
+                                    //participants are not allowed to clear
                                 }
                             }
                         }
                     }
                 }
+                println("Session closed for lobby $id and nickname $nickname.")
+                println("Closed reason: ${closeReason.await()}")
+                buzzingSessionManager.onParticipantLeft(id = id, nickname = nickname)
             }
+
+            webSocket("host/{id}") {
+
+                val id = requireNotNull(call.parameters["id"]) { "path parameter {id} not set" }
+
+                buzzingSessionManager.getBuzzerFlow(id = id)
+                    .onEach { buzzingSessionData ->
+                        val apiModel = BuzzerData(
+                            id = buzzingSessionData.id,
+                            participants = buzzingSessionData.participantsState.map { participantState ->
+                                BuzzerData.ParticipantState(
+                                    index = participantState.index,
+                                    name = participantState.name,
+                                    buzzed = participantState.buzzed
+                                )
+                            }
+                        )
+                        send(json.encodeToString(BuzzerData.serializer(), apiModel))
+                    }
+                    .flowOn(Dispatchers.IO)
+                    .launchIn(this)
+
+                for (frame in incoming) {
+                    when (frame) {
+                        is Frame.Text -> {
+                            val receivedText = frame.readText()
+                            val incomingMessage = json.decodeFromString(IncomingMessage.serializer(), receivedText)
+                            when (incomingMessage.type) {
+                                IncomingMessage.Type.Clear -> {
+                                    buzzingSessionManager.clearBuzzes(
+                                        id = id
+                                    )
+                                }
+                                IncomingMessage.Type.Buzz -> {
+                                    //Hosts are not allowed to buzz
+                                }
+                            }
+                        }
+                    }
+                }
+                println("Session closed for lobby $id as host.")
+                println("Closed reason: ${closeReason.await()}")
+            }
+
         }
 
     }
