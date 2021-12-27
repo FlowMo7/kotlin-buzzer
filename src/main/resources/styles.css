@@ -1,11 +1,12 @@
 .header {
     text-align: center;
+    font-size: 2em;
+    display: block;
 }
 
 .buzzer {
     height: 10em;
     font-size: 2em;
-    background-color: rgb(243, 175, 185);
     color: rgb(18, 30, 102);
     padding: 1.4em 1.4em;
     cursor: pointer;
@@ -15,4 +16,11 @@
     width: 100%;
     border-radius: 5px;
     font-weight: 500;
+}
+
+.buzzer-ready {
+    background-color: limegreen;
+}
+.buzzer-buzzed {
+    background-color: cornflowerblue;
 }

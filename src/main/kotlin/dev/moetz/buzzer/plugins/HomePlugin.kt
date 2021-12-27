@@ -40,9 +40,6 @@ fun Application.configure(
                                     submitInput()
                                 }
                             }
-
-                            br()
-                            br()
                             br()
                         }
 
@@ -118,8 +115,9 @@ fun Application.configure(
                     link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
                 }
                 body {
-                    h3 { +"Buzzer (Participant)" }
-                    br()
+                    div(classes = "header") {
+                        h3 { +"Buzzer" }
+                    }
 
                     span {
                         id = "connection_status"
@@ -137,6 +135,7 @@ fun Application.configure(
 
                     div {
                         button(classes = "buzzer") {
+                            id = "buzzer_button"
                             onClick = "sendBuzz();"
                             +"Buzz"
                         }
@@ -161,8 +160,9 @@ fun Application.configure(
                     link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
                 }
                 body {
-                    h3 { +"Buzzer (Host)" }
-                    br()
+                    div(classes = "header") {
+                        h3 { +"Buzzer (Host)" }
+                    }
 
                     span {
                         id = "connection_status"

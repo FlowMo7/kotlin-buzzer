@@ -40,7 +40,7 @@ function host(pathPrefix, lobbyCode) {
                 text += '<li>' + item.name + ' (' + item.buzzed + ')</li>';
             })
             text += '</ul>';
-            document.getElementById('participant_list').innerHTML = text
+            document.getElementById('participant_list').innerHTML = text;
         },
         function (isConnected) {
             if (isConnected) {
@@ -53,10 +53,23 @@ function host(pathPrefix, lobbyCode) {
 }
 
 function participant(pathPrefix, lobbyCode) {
+    let nickname = getParameterByName('nickname');
     connectToWebsocket(
-        pathPrefix + '/ws/feed/' + lobbyCode + '?nickname=' + getParameterByName('nickname'),
+        pathPrefix + '/ws/feed/' + lobbyCode + '?nickname=' + nickname,
         function (data) {
             console.log(data)
+            let payload = JSON.parse(data);
+            payload.participants.forEach(function (participantState) {
+                if (participantState.name === nickname) {
+                    if (participantState.buzzed === true) {
+                        document.getElementById('buzzer_button').classList.add('buzzer-buzzed');
+                        document.getElementById('buzzer_button').classList.remove('buzzer-ready');
+                    } else {
+                        document.getElementById('buzzer_button').classList.add('buzzer-ready');
+                        document.getElementById('buzzer_button').classList.remove('buzzer-buzzed');
+                    }
+                }
+            })
         },
         function (isConnected) {
             if (isConnected) {
