@@ -1,11 +1,9 @@
 package dev.moetz.buzzer.manager
 
-import dev.moetz.buzzer.model.BuzzerData
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Before
-
-import org.junit.Assert.*
 import org.junit.Test
 
 class BuzzingSessionManagerTest {
