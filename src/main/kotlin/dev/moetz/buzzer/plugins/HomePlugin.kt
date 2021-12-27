@@ -188,18 +188,18 @@ fun Application.configure(
                         }
                         a(href = lobbyJoinUrl) { +lobbyJoinUrl }
                     }
-                    br()
 
-                    div {
-                        id = "participant_list"
-                    }
-
-                    br()
-                    br()
                     div {
                         button {
                             onClick = "resetBuzzes();"
                             +"Reset Buzzes"
+                        }
+                    }
+
+                    div {
+                        +"List of participants:"
+                        div {
+                            id = "participant_list"
                         }
                     }
                 }

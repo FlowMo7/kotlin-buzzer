@@ -34,13 +34,32 @@ function host(pathPrefix, lobbyCode) {
         pathPrefix + '/ws/host/' + lobbyCode,
         function (data) {
             console.log(data)
-            var text = '<ul>'
             let payload = JSON.parse(data);
-            payload.participants.forEach(function (item) {
-                text += '<li>' + item.name + ' (' + item.buzzed + ')</li>';
-            })
-            text += '</ul>';
-            document.getElementById('participant_list').innerHTML = text;
+            if (payload.participants.length === 0) {
+                document.getElementById('participant_list').innerHTML = '<i>No participants yet</i>';
+            } else {
+                var text = '<ul>'
+                payload.participants.forEach(function (item, index) {
+                    text += '<li>' + item.name;
+
+                    if (item.buzzed) {
+                        text += ' (BUZZED ';
+                        if (index === 0) {
+                            text += '1st'
+                        } else if (index === 1) {
+                            text += '2nd';
+                        } else if (index === 2) {
+                            text += '3rd';
+                        } else {
+                            text += (index + 1) + 'th';
+                        }
+                        text += ')'
+                    }
+                    text += '</li>';
+                })
+                text += '</ul>';
+                document.getElementById('participant_list').innerHTML = text;
+            }
         },
         function (isConnected) {
             if (isConnected) {
@@ -92,19 +111,6 @@ function resetBuzzes() {
         type: 'Clear'
     }));
 }
-
-// function checkWebSocketConnectionAlive() {
-//     if (socket.readyState !== WebSocket.OPEN) {
-//         //loadContentPerGet();
-//     }
-//     if (socket.readyState === WebSocket.CLOSED) {
-//         connectToWebsocket();
-//     }
-// }
-
-// setInterval(function() {
-//     checkWebSocketConnectionAlive();
-// }, 5000);
 
 
 function getParameterByName(name, url = window.location.href) {
