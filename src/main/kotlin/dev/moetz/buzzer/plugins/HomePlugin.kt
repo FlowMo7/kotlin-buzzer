@@ -3,10 +3,94 @@ package dev.moetz.buzzer.plugins
 import dev.moetz.buzzer.manager.BuzzingSessionManager
 import io.ktor.application.*
 import io.ktor.html.*
+import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.html.*
+
+class SiteTemplate : Template<HTML> {
+
+    val siteTitle = Placeholder<TITLE>()
+    val content = Placeholder<FlowContent>()
+
+    val additionalHeadStuff = Placeholder<HEAD>()
+
+    override fun HTML.apply() {
+        head {
+            meta(charset = "utf-8")
+            title { insert(siteTitle) }
+            script(type = "text/javascript", src = "/static/websocket.js") {
+
+            }
+            link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
+            insert(additionalHeadStuff)
+        }
+        body {
+            main {
+                insert(content)
+            }
+        }
+    }
+
+}
+
+
+class CreateLobbyTemplate : Template<FlowContent> {
+    override fun FlowContent.apply() {
+        div(classes = "centered") {
+            form(action = "/create", method = FormMethod.post) {
+                submitInput(classes = "form-button centered centered-text") {
+                    value = "Create New Lobby"
+                }
+            }
+        }
+        br()
+    }
+}
+
+class JoinLobbyTemplate(
+    private val lobbyCode: String?
+) : Template<FlowContent> {
+    override fun FlowContent.apply() {
+        if (lobbyCode == null) {
+            div(classes = "centered") {
+                form(action = "/join", method = FormMethod.post) {
+                    span(classes = "centered-text") { +"Join a Lobby:" }
+                    br()
+                    textInput(name = "lobbyCode", classes = "form-input") {
+                        placeholder = "Lobby-Code"
+                    }
+                    textInput(name = "nickname", classes = "form-input") {
+                        placeholder = "Nickname"
+                    }
+                    submitInput(classes = "form-button centered centered-text") {
+                        value = "Join"
+                    }
+
+                }
+            }
+        } else {
+            div(classes = "centered") {
+                form(action = "/join", method = FormMethod.post) {
+                    +"Enter a nickname to join the lobby:"
+                    br()
+                    textInput(name = "nickname", classes = "form-input") {
+                        placeholder = "Nickname"
+                    }
+
+                    hiddenInput(name = "lobbyCode") {
+                        value = lobbyCode
+                    }
+
+                    submitInput(classes = "form-button centered centered-text") {
+                        value = "Join"
+                    }
+                }
+            }
+        }
+    }
+}
 
 fun Application.configure(
     buzzingSessionManager: BuzzingSessionManager,
@@ -17,61 +101,20 @@ fun Application.configure(
     routing {
 
         get {
-            val lobbyIdQueryParameter = call.request.queryParameters["lobbyCode"]
-            call.respondHtml {
-                head {
-                    meta(charset = "utf-8")
-                    title("Buzzer")
-                    script(type = "text/javascript", src = "/static/websocket.js") {
+            call.respondHtmlTemplate(SiteTemplate()) {
+                siteTitle { +"Buzzer" }
+
+                content {
+                    div(classes = "header") {
+                        h2 { +"Buzzer" }
+                    }
+
+                    insert(CreateLobbyTemplate()) {
 
                     }
-                    link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
-                }
-                body {
-                    main {
-                        div(classes = "header") {
-                            h3 { +"Buzzer" }
-                        }
 
-                        if (lobbyIdQueryParameter.isNullOrBlank()) {
-                            div {
-                                form(action = "/create", method = FormMethod.post) {
-                                    +"Create new lobby"
-                                    submitInput()
-                                }
-                            }
-                            br()
-                        }
+                    insert(JoinLobbyTemplate(lobbyCode = null)) {
 
-                        div {
-                            form(action = "/join", method = FormMethod.post) {
-
-                                if (lobbyIdQueryParameter.isNullOrBlank()) {
-                                    +"Join a Lobby:"
-                                    br()
-                                    textInput(name = "lobbyCode") {
-                                        placeholder = "Lobby-Code"
-                                    }
-                                    br()
-                                    textInput(name = "nickname") {
-                                        placeholder = "Nickname"
-                                    }
-                                    submitInput()
-                                } else {
-                                    +"Enter a nickname to join the lobby:"
-                                    br()
-                                    textInput(name = "nickname") {
-                                        placeholder = "Nickname"
-                                    }
-
-                                    hiddenInput(name = "lobbyCode") {
-                                        value = lobbyIdQueryParameter
-                                    }
-
-                                    submitInput()
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -82,18 +125,44 @@ fun Application.configure(
             call.respondRedirect(url = "/host/$lobbyCode", permanent = false)
         }
 
-        post("join") {
-            val (lobbyCode, nickname) = try {
-                val parameters = call.receiveParameters()
-                parameters["lobbyCode"]!! to parameters["nickname"]
-            } catch (throwable: Throwable) {
-                throwable.printStackTrace()
-                null to null
+        route("join") {
+
+            get("{lobbyCode}") {
+                val lobbyCode = call.parameters["lobbyCode"]?.ifBlank { null }
+                if (lobbyCode == null) {
+                    call.respond(HttpStatusCode.NotFound)
+                } else {
+                    call.respondHtmlTemplate(SiteTemplate()) {
+                        siteTitle {
+                            +"Buzzer"
+                        }
+
+                        content {
+                            div(classes = "header") {
+                                h2 { +"Buzzer" }
+                            }
+
+                            insert(JoinLobbyTemplate(lobbyCode = lobbyCode)) {
+
+                            }
+                        }
+                    }
+                }
             }
-            if (lobbyCode != null) {
-                call.respondRedirect(url = "/lobby/$lobbyCode?nickname=$nickname", permanent = false)
-            } else {
-                call.respondRedirect(url = "/", permanent = false)
+
+            post {
+                val (lobbyCode, nickname) = try {
+                    val parameters = call.receiveParameters()
+                    parameters["lobbyCode"]!! to parameters["nickname"]
+                } catch (throwable: Throwable) {
+                    throwable.printStackTrace()
+                    null to null
+                }
+                if (lobbyCode != null) {
+                    call.respondRedirect(url = "/lobby/$lobbyCode?nickname=$nickname", permanent = false)
+                } else {
+                    call.respondRedirect(url = "/", permanent = false)
+                }
             }
         }
 
@@ -102,19 +171,17 @@ fun Application.configure(
             val nickname =
                 requireNotNull(call.request.queryParameters["nickname"]) { "nickname not set in query parameters" }
 
-            call.respondHtml {
-                head {
-                    meta(charset = "utf-8")
-                    title("Buzzer")
-                    script(type = "text/javascript", src = "/static/websocket.js") {
-                    }
 
+            call.respondHtmlTemplate(SiteTemplate()) {
+                siteTitle { +"Buzzer" }
+
+                additionalHeadStuff {
                     script(type = "text/javascript") {
                         +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
                     }
-                    link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
                 }
-                body {
+
+                content {
                     div(classes = "header") {
                         h3 { +"Buzzer" }
                     }
@@ -146,60 +213,55 @@ fun Application.configure(
 
         get("host/{lobbyCode}") {
             val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyId not set in path" }
-            call.respondHtml {
-                head {
-                    meta(charset = "utf-8")
-                    title("Buzzer Host")
-                    script(type = "text/javascript", src = "/static/websocket.js") {
 
-                    }
 
+            call.respondHtmlTemplate(SiteTemplate()) {
+                siteTitle { +"Buzzer Host" }
+
+                additionalHeadStuff {
                     script(type = "text/javascript") {
                         +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
                     }
-                    link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
                 }
-                body {
+
+                content {
                     div(classes = "header") {
                         h3 { +"Buzzer (Host)" }
                     }
+                    div(classes = "centered centered-text") {
 
-                    span {
-                        id = "connection_status"
-                        style = "color: red;"
-                    }
-
-                    div {
-                        id = "lobby_code"
-                        +"Lobby-Code: $lobbyCode"
-                    }
-
-                    div {
-                        +"Link to join this lobby:"
-                        br()
-                        val lobbyJoinUrl = buildString {
-                            if (isSecure) {
-                                append("https://")
-                            } else {
-                                append("http://")
-                            }
-                            append(publicHostname)
-                            append("/?lobbyCode=$lobbyCode")
+                        span {
+                            id = "connection_status"
+                            style = "color: red;"
                         }
-                        a(href = lobbyJoinUrl) { +lobbyJoinUrl }
-                    }
 
-                    div {
-                        button {
-                            onClick = "resetBuzzes();"
-                            +"Reset Buzzes"
-                        }
-                    }
-
-                    div {
-                        +"List of participants:"
                         div {
-                            id = "participant_list"
+                            +"Link to join this lobby:"
+                            br()
+                            val lobbyJoinUrl = buildString {
+                                if (isSecure) {
+                                    append("https://")
+                                } else {
+                                    append("http://")
+                                }
+                                append(publicHostname)
+                                append("/join/$lobbyCode")
+                            }
+                            a(href = lobbyJoinUrl) { +lobbyJoinUrl }
+                        }
+
+                        div {
+                            button(classes = "form-button centered-text centered") {
+                                onClick = "resetBuzzes();"
+                                +"Reset Buzzes"
+                            }
+                        }
+
+                        div {
+                            +"List of participants:"
+                            div {
+                                id = "participant_list"
+                            }
                         }
                     }
                 }

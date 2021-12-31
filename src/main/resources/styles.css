@@ -1,7 +1,48 @@
+@font-face {
+    font-family: RobotoBold;
+    src: url(font/Roboto-Bold.ttf);
+}
+
+
 .header {
     text-align: center;
-    font-size: 2em;
+    font-size: 1.5em;
     display: block;
+}
+
+.centered-text {
+    text-align: center;
+}
+
+.centered {
+    width: 100%;
+    max-width: 400px;
+    padding: 1em;
+    margin: 0 auto;
+}
+
+.form-button {
+    padding: 1.4em 1.4em;
+    font-size: 1.2em;
+    background-color: #161D99;
+    width: 100%;
+    color: #FFFFFF;
+    cursor: pointer;
+    border: 0;
+    max-width: 400px;
+    margin: 1em 0;
+    border-radius: 5px;
+    font-family: RobotoBold, serif;
+}
+
+.form-input {
+    border: 1px solid #B8B8B8;
+    display: block;
+    padding: 0.8em 1.4em;
+    margin: 1em 0;
+    border-radius: 5px;
+    font-family: RobotoBold, serif;
+    font-size: 1em;
 }
 
 .buzzer {
@@ -21,6 +62,7 @@
 .buzzer-ready {
     background-color: limegreen;
 }
+
 .buzzer-buzzed {
     background-color: cornflowerblue;
 }

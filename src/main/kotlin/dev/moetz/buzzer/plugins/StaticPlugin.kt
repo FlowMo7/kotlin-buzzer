@@ -11,6 +11,10 @@ fun Application.configureStatic() {
         route("static") {
             resource(remotePath = "websocket.js", resource = "websocket.js")
             resource(remotePath = "styles.css", resource = "styles.css")
+
+            route("font") {
+                resource(remotePath = "Roboto-Bold.ttf", resource = "font/Roboto-Bold.ttf")
+            }
         }
 
     }
