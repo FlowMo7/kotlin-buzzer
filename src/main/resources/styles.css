@@ -21,6 +21,10 @@
     margin: 0 auto;
 }
 
+.participant-box {
+    text-align: left;
+}
+
 .form-button {
     padding: 1.4em 1.4em;
     font-size: 1.2em;

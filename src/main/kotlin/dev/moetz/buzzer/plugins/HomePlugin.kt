@@ -257,7 +257,7 @@ fun Application.configure(
                             }
                         }
 
-                        div {
+                        div(classes = "participant-box") {
                             +"List of participants:"
                             div {
                                 id = "participant_list"
