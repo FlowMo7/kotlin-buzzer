@@ -96,6 +96,16 @@ class BuzzingSessionManager {
         }
     }
 
+    suspend fun onHostEntered(id: String) {
+        println("onHostEntered($id)")
+        //TODO
+    }
+
+    suspend fun onHostLeft(id: String) {
+        println("onHostLeft($id)")
+        //TODO
+    }
+
     suspend fun createNewLobby(): String {
         println("createNewLobby()")
         return getNewLobbyCode()

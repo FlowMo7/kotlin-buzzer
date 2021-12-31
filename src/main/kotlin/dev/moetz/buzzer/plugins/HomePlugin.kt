@@ -97,8 +97,8 @@ fun Application.configure(
             }
         }
 
-        get("lobby/{lobbyId}") {
-            val lobbyId = requireNotNull(call.parameters["lobbyId"]) { "lobbyId not set in path" }
+        get("lobby/{lobbyCode}") {
+            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyId not set in path" }
             val nickname =
                 requireNotNull(call.request.queryParameters["nickname"]) { "nickname not set in query parameters" }
 
@@ -110,7 +110,7 @@ fun Application.configure(
                     }
 
                     script(type = "text/javascript") {
-                        +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyId'); };"
+                        +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
                     }
                     link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
                 }

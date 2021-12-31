@@ -25,6 +25,7 @@ fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSes
                     requireNotNull(call.request.queryParameters["nickname"]) { "query parameter {nickname} not set" }
 
                 buzzingSessionManager.onParticipantEntered(id = id, nickname = nickname)
+
                 buzzingSessionManager.getBuzzerFlow(id = id)
                     .onEach { buzzingSessionData ->
                         val apiModel = BuzzerData(
@@ -70,6 +71,8 @@ fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSes
 
                 val id = requireNotNull(call.parameters["id"]) { "path parameter {id} not set" }
 
+                buzzingSessionManager.onHostEntered(id = id)
+
                 buzzingSessionManager.getBuzzerFlow(id = id)
                     .onEach { buzzingSessionData ->
                         val apiModel = BuzzerData(
@@ -107,6 +110,7 @@ fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSes
                 }
                 println("Session closed for lobby $id as host.")
                 println("Closed reason: ${closeReason.await()}")
+                buzzingSessionManager.onHostLeft(id = id)
             }
 
         }
