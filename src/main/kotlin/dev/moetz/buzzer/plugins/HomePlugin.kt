@@ -59,9 +59,11 @@ class JoinLobbyTemplate(
                     span(classes = "centered-text") { +"Join a Lobby:" }
                     br()
                     textInput(name = "lobbyCode", classes = "form-input") {
+                        required = true
                         placeholder = "Lobby-Code"
                     }
                     textInput(name = "nickname", classes = "form-input") {
+                        required = true
                         placeholder = "Nickname"
                     }
                     submitInput(classes = "form-button centered centered-text") {
@@ -76,6 +78,7 @@ class JoinLobbyTemplate(
                     +"Enter a nickname to join the lobby:"
                     br()
                     textInput(name = "nickname", classes = "form-input") {
+                        required = true
                         placeholder = "Nickname"
                     }
 
@@ -153,12 +156,12 @@ fun Application.configure(
             post {
                 val (lobbyCode, nickname) = try {
                     val parameters = call.receiveParameters()
-                    parameters["lobbyCode"]!! to parameters["nickname"]
+                    parameters["lobbyCode"]?.ifBlank { null } to parameters["nickname"]?.ifBlank { null }
                 } catch (throwable: Throwable) {
                     throwable.printStackTrace()
                     null to null
                 }
-                if (lobbyCode != null) {
+                if (lobbyCode != null && nickname != null) {
                     call.respondRedirect(url = "/lobby/$lobbyCode?nickname=$nickname", permanent = false)
                 } else {
                     call.respondRedirect(url = "/", permanent = false)
