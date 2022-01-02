@@ -7,7 +7,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*
 
-class BuzzingSessionManager {
+class BuzzingSessionManager(
+    private val buzzLogging: BuzzLogging
+) {
 
     data class BuzzingSessionData(
         val id: String,
@@ -58,7 +60,7 @@ class BuzzingSessionManager {
     }
 
     suspend fun onParticipantEntered(id: String, nickname: String) {
-        println("onParticipantEntered($id, $nickname)")
+        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "$nickname joined")
         val flow = getOrAddBuzzingSessionStateFlow(id)
         flowMutationMutex.withLock {
             flow.value = flow.value.let { currentState ->
@@ -84,7 +86,7 @@ class BuzzingSessionManager {
     }
 
     suspend fun onParticipantLeft(id: String, nickname: String) {
-        println("onParticipantLeft($id, $nickname)")
+        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "$nickname left")
         val flow = getOrAddBuzzingSessionStateFlow(id)
         flowMutationMutex.withLock {
             flow.value = flow.value.let { currentState ->
@@ -97,22 +99,23 @@ class BuzzingSessionManager {
     }
 
     suspend fun onHostEntered(id: String) {
-        println("onHostEntered($id)")
+        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Host, "joined")
         //TODO
     }
 
     suspend fun onHostLeft(id: String) {
-        println("onHostLeft($id)")
+        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Host, "left")
         //TODO
     }
 
     suspend fun createNewLobby(): String {
-        println("createNewLobby()")
-        return getNewLobbyCode()
+        return getNewLobbyCode().also { lobbyId ->
+            buzzLogging.log(lobby = lobbyId, role = BuzzLogging.Role.Host, "created")
+        }
     }
 
     suspend fun addBuzz(id: String, participantName: String) {
-        println("addBuzz($id, $participantName)")
+        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "buzzed")
         val flow = getOrAddBuzzingSessionStateFlow(id)
         flowMutationMutex.withLock {
             flow.value = flow.value.let { currentState ->
@@ -169,7 +172,7 @@ class BuzzingSessionManager {
     }
 
     suspend fun clearBuzzes(id: String) {
-        println("clearBuzzes($id)")
+        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Host, "buzzes cleared")
         val flow = getOrAddBuzzingSessionStateFlow(id)
         flowMutationMutex.withLock {
             flow.value = flow.value.let { currentState ->

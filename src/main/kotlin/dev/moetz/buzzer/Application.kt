@@ -1,5 +1,6 @@
 package dev.moetz.buzzer
 
+import dev.moetz.buzzer.manager.BuzzLogging
 import dev.moetz.buzzer.manager.BuzzingSessionManager
 import dev.moetz.buzzer.plugins.configure
 import dev.moetz.buzzer.plugins.configureStatic
@@ -14,14 +15,25 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
+import java.io.File
 import java.time.Duration
 
 fun main() {
 
     val isSecure = System.getenv("IS_SECURE")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: false
     val publicHostname = System.getenv("PUBLIC_HOSTNAME")?.takeIf { it.isNotBlank() } ?: "localhost:8080"
+    val debugLogsEnabled = System.getenv("ENABLE_DEBUG_LOGS")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: true
+    val logFilePath = "/etc/log/kotlin-buzzer"
 
-    val buzzingSessionManager = BuzzingSessionManager()
+
+    val buzzLogging = BuzzLogging(
+        logFile = File(logFilePath, "log.txt"),
+        alsoLogToStdout = debugLogsEnabled
+    )
+
+    val buzzingSessionManager = BuzzingSessionManager(
+        buzzLogging = buzzLogging
+    )
 
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         install(WebSockets) {
