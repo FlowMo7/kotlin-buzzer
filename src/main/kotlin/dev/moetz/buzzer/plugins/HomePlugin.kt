@@ -255,13 +255,29 @@ fun Application.configure(
 
                         div {
                             button(classes = "form-button centered-text centered") {
+                                style = "background-color: darkred;"
                                 onClick = "resetBuzzes();"
                                 +"Reset Buzzes"
                             }
                         }
 
                         div(classes = "participant-box") {
-                            +"List of participants:"
+                            div("centered-text") { +"Buzzes:" }
+                            div {
+                                id = "buzzes_list"
+                            }
+                        }
+
+                        br()
+
+                        div(classes = "participant-box") {
+                            +"List of participants"
+                            unsafe { +"&nbsp;(" }
+                            span {
+                                id = "participant_count"
+                                +"0"
+                            }
+                            +"):"
                             div {
                                 id = "participant_list"
                             }

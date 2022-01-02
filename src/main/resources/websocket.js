@@ -29,37 +29,61 @@ function connectToWebsocket(webSocketUrl, onMessageReceived, onConnectionStateCh
     };
 }
 
+function getXnd(place) {
+    if (place === 1) {
+        return '1st'
+    } else if (place === 2) {
+        return '2nd';
+    } else if (place === 3) {
+        return '3rd';
+    } else {
+        return place + 'th';
+    }
+}
+
+function buildParticipantsList(participants) {
+    if (participants.length === 0) {
+        return '<i>No participants yet</i>';
+    } else {
+        var text = '<ul>'
+        participants.forEach(function (item, index) {
+            text += '<li>' + item.name;
+
+            if (item.buzzed) {
+                text += ' (BUZZED ' + getXnd(index + 1) + ')';
+            }
+            text += '</li>';
+        })
+        text += '</ul>';
+        return text;
+    }
+}
+
+function buildBuzzesList(participants) {
+    if (participants.length === 0) {
+        return '';
+    } else {
+        var text = ''
+        participants.filter(it => it.buzzed === true).forEach(function (item, index) {
+            if (index === 0) {
+                text += '<div class="host-buzz-entry host-buzz-entry-first">' + item.name + '<span class="host-buzz-place">' + getXnd(index + 1) + '</span></div><br />\n';
+            } else {
+                text += '<div class="host-buzz-entry host-buzz-entry-not-first">' + item.name + '<span class="host-buzz-place">' + getXnd(index + 1) + '</span></div><br />\n';
+            }
+        })
+        return text;
+    }
+}
+
 function host(pathPrefix, lobbyCode) {
     connectToWebsocket(
         pathPrefix + '/ws/host/' + lobbyCode,
         function (data) {
             console.log(data)
             let payload = JSON.parse(data);
-            if (payload.participants.length === 0) {
-                document.getElementById('participant_list').innerHTML = '<i>No participants yet</i>';
-            } else {
-                var text = '<ul>'
-                payload.participants.forEach(function (item, index) {
-                    text += '<li>' + item.name;
-
-                    if (item.buzzed) {
-                        text += ' (BUZZED ';
-                        if (index === 0) {
-                            text += '1st'
-                        } else if (index === 1) {
-                            text += '2nd';
-                        } else if (index === 2) {
-                            text += '3rd';
-                        } else {
-                            text += (index + 1) + 'th';
-                        }
-                        text += ')'
-                    }
-                    text += '</li>';
-                })
-                text += '</ul>';
-                document.getElementById('participant_list').innerHTML = text;
-            }
+            document.getElementById('participant_count').innerHTML = payload.participants.length;
+            document.getElementById('participant_list').innerHTML = buildParticipantsList(payload.participants);
+            document.getElementById('buzzes_list').innerHTML = buildBuzzesList(payload.participants);
         },
         function (isConnected) {
             if (isConnected) {
