@@ -255,7 +255,7 @@ fun Application.configure(
 
                         div {
                             button(classes = "form-button centered-text centered") {
-                                style = "background-color: darkred;"
+                                style = "background-color: dimgray;"
                                 onClick = "resetBuzzes();"
                                 +"Reset Buzzes"
                             }
@@ -263,6 +263,7 @@ fun Application.configure(
 
                         div(classes = "participant-box") {
                             div("centered-text") { +"Buzzes:" }
+                            br()
                             div {
                                 id = "buzzes_list"
                             }
