@@ -29,6 +29,8 @@ fun Application.configureWebSocket(
 
                 if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                     close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "lobbyCode contains invalid characters"))
+                } else if (buzzingSessionManager.isValidNickname(nickname).not()) {
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "nickname contains invalid characters"))
                 } else {
                     buzzingSessionManager.onParticipantEntered(id = lobbyCode, nickname = nickname)
 

@@ -195,4 +195,9 @@ class BuzzingSessionManager(
         return regex.matches(code)
     }
 
+    suspend fun isValidNickname(nickname: String): Boolean {
+        val regex = "^[a-zA-Z0-9-_ ]*\$".toRegex()
+        return regex.matches(nickname)
+    }
+
 }

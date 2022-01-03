@@ -131,4 +131,16 @@ class BuzzingSessionManagerTest {
         }
     }
 
+    @Test
+    fun testIsValidNickname() {
+        runBlocking {
+            buzzingSessionManager.isValidNickname("asdfAASD123123-_ ").shouldBeTrue()
+            buzzingSessionManager.isValidNickname("asdg32649846c9").shouldBeTrue()
+            buzzingSessionManager.isValidNickname("KJAGD8237648-_").shouldBeTrue()
+            buzzingSessionManager.isValidNickname("valid space").shouldBeTrue()
+            buzzingSessionManager.isValidNickname("<script>").shouldBeFalse()
+            buzzingSessionManager.isValidNickname("\"").shouldBeFalse()
+        }
+    }
+
 }

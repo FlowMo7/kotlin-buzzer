@@ -85,7 +85,10 @@ fun Application.configure(
                     throwable.printStackTrace()
                     null to null
                 }
-                if (lobbyCode != null && nickname != null && buzzingSessionManager.isValidLobbyCode(lobbyCode)) {
+                if (lobbyCode != null && nickname != null && buzzingSessionManager.isValidLobbyCode(lobbyCode) && buzzingSessionManager.isValidNickname(
+                        nickname
+                    )
+                ) {
                     call.respondRedirect(url = "/lobby/$lobbyCode?nickname=$nickname", permanent = false)
                 } else {
                     call.respondRedirect(url = "/", permanent = false)
@@ -100,6 +103,8 @@ fun Application.configure(
 
             if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
+            } else if (buzzingSessionManager.isValidNickname(nickname).not()) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid nickname characters")
             } else {
                 call.respondHtmlTemplate(SiteTemplate("Buzzer")) {
                     additionalHeadStuff {
