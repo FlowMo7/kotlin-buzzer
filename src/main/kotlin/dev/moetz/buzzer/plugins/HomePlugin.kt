@@ -57,11 +57,11 @@ fun Application.configure(
                 val lobbyCode = call.parameters["lobbyCode"]?.ifBlank { null }
                 if (lobbyCode == null) {
                     call.respond(HttpStatusCode.NotFound)
+                } else if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                    call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
                 } else {
                     call.respondHtmlTemplate(SiteTemplate()) {
-                        siteTitle {
-                            +"Buzzer"
-                        }
+                        siteTitle { +"Buzzer" }
 
                         content {
                             div(classes = "header") {
@@ -84,7 +84,7 @@ fun Application.configure(
                     throwable.printStackTrace()
                     null to null
                 }
-                if (lobbyCode != null && nickname != null) {
+                if (lobbyCode != null && nickname != null && buzzingSessionManager.isValidLobbyCode(lobbyCode)) {
                     call.respondRedirect(url = "/lobby/$lobbyCode?nickname=$nickname", permanent = false)
                 } else {
                     call.respondRedirect(url = "/", permanent = false)
@@ -97,41 +97,44 @@ fun Application.configure(
             val nickname =
                 requireNotNull(call.request.queryParameters["nickname"]) { "nickname not set in query parameters" }
 
+            if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
+            } else {
+                call.respondHtmlTemplate(SiteTemplate()) {
+                    siteTitle { +"Buzzer" }
 
-            call.respondHtmlTemplate(SiteTemplate()) {
-                siteTitle { +"Buzzer" }
-
-                additionalHeadStuff {
-                    script(type = "text/javascript") {
-                        +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
-                    }
-                }
-
-                content {
-                    div(classes = "header") {
-                        h3 { +"Buzzer" }
-                    }
-
-                    div(classes = "centered centered-text") {
-                        span {
-                            id = "connection_status"
-                            style = "color: red;"
+                    additionalHeadStuff {
+                        script(type = "text/javascript") {
+                            +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
                         }
-                        br()
+                    }
 
-                        p {
-                            +"Your nickname:"
-                            unsafe { +"&nbsp;" }
-                            i {
-                                +nickname
+                    content {
+                        div(classes = "header") {
+                            h3 { +"Buzzer" }
+                        }
+
+                        div(classes = "centered centered-text") {
+                            span {
+                                id = "connection_status"
+                                style = "color: red;"
                             }
-                        }
+                            br()
 
-                        div {
-                            button(classes = "buzzer") {
-                                id = "buzzer_button"
-                                onClick = "sendBuzz();"
-                                +"Buzz"
+                            p {
+                                +"Your nickname:"
+                                unsafe { +"&nbsp;" }
+                                i {
+                                    +nickname
+                                }
+                            }
+
+                            div {
+                                button(classes = "buzzer") {
+                                    id = "buzzer_button"
+                                    onClick = "sendBuzz();"
+                                    +"Buzz"
+                                }
                             }
                         }
                     }
@@ -142,70 +145,73 @@ fun Application.configure(
         get("host/{lobbyCode}") {
             val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyId not set in path" }
 
+            if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
+            } else {
+                call.respondHtmlTemplate(SiteTemplate()) {
+                    siteTitle { +"Buzzer Host" }
 
-            call.respondHtmlTemplate(SiteTemplate()) {
-                siteTitle { +"Buzzer Host" }
-
-                additionalHeadStuff {
-                    script(type = "text/javascript") {
-                        +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
+                    additionalHeadStuff {
+                        script(type = "text/javascript") {
+                            +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
+                        }
                     }
-                }
 
-                content {
-                    div(classes = "header") {
-                        h3 { +"Buzzer (Host)" }
-                    }
-                    div(classes = "centered centered-text") {
-
-                        span {
-                            id = "connection_status"
-                            style = "color: red;"
+                    content {
+                        div(classes = "header") {
+                            h3 { +"Buzzer (Host)" }
                         }
+                        div(classes = "centered centered-text") {
 
-                        div {
-                            +"Link to join this lobby:"
-                            br()
-                            val lobbyJoinUrl = buildString {
-                                if (isSecure) {
-                                    append("https://")
-                                } else {
-                                    append("http://")
-                                }
-                                append(publicHostname)
-                                append("/join/$lobbyCode")
-                            }
-                            a(href = lobbyJoinUrl) { +lobbyJoinUrl }
-                        }
-
-                        div {
-                            button(classes = "form-button centered-text centered") {
-                                style = "background-color: dimgray;"
-                                onClick = "resetBuzzes();"
-                                +"Reset Buzzes"
-                            }
-                        }
-
-                        div(classes = "participant-box") {
-                            div("centered-text") { +"Buzzes:" }
-                            br()
-                            div {
-                                id = "buzzes_list"
-                            }
-                        }
-
-                        br()
-
-                        div(classes = "participant-box") {
-                            +"List of participants"
-                            unsafe { +"&nbsp;(" }
                             span {
-                                id = "participant_count"
-                                +"0"
+                                id = "connection_status"
+                                style = "color: red;"
                             }
-                            +"):"
+
                             div {
-                                id = "participant_list"
+                                +"Link to join this lobby:"
+                                br()
+                                val lobbyJoinUrl = buildString {
+                                    if (isSecure) {
+                                        append("https://")
+                                    } else {
+                                        append("http://")
+                                    }
+                                    append(publicHostname)
+                                    append("/join/$lobbyCode")
+                                }
+                                a(href = lobbyJoinUrl) { +lobbyJoinUrl }
+                            }
+
+                            div {
+                                button(classes = "form-button centered-text centered") {
+                                    style = "background-color: dimgray;"
+                                    onClick = "resetBuzzes();"
+                                    +"Reset Buzzes"
+                                }
+                            }
+
+                            div(classes = "participant-box") {
+                                div("centered-text") { +"Buzzes:" }
+                                br()
+                                div {
+                                    id = "buzzes_list"
+                                }
+                            }
+
+                            br()
+
+                            div(classes = "participant-box") {
+                                +"List of participants"
+                                unsafe { +"&nbsp;(" }
+                                span {
+                                    id = "participant_count"
+                                    +"0"
+                                }
+                                +"):"
+                                div {
+                                    id = "participant_list"
+                                }
                             }
                         }
                     }

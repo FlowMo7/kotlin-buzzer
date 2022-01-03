@@ -190,4 +190,9 @@ class BuzzingSessionManager(
         }
     }
 
+    suspend fun isValidLobbyCode(code: String): Boolean {
+        val regex = "^[a-zA-Z0-9-_]*\$".toRegex()
+        return regex.matches(code)
+    }
+
 }

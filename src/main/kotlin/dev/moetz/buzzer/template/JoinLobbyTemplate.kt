@@ -14,6 +14,7 @@ class JoinLobbyTemplate(
                     br()
                     textInput(name = "lobbyCode", classes = "form-input") {
                         required = true
+                        pattern = "[a-zA-Z0-9-_]"
                         placeholder = "Lobby-Code"
                     }
                     textInput(name = "nickname", classes = "form-input") {

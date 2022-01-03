@@ -22,103 +22,110 @@ fun Application.configureWebSocket(
     routing {
         route("ws") {
 
-            webSocket("feed/{id}") {
-
-                val id = requireNotNull(call.parameters["id"]) { "path parameter {id} not set" }
+            webSocket("feed/{lobbyCode}") {
+                val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "path parameter {lobbyCode} not set" }
                 val nickname =
                     requireNotNull(call.request.queryParameters["nickname"]) { "query parameter {nickname} not set" }
 
-                buzzingSessionManager.onParticipantEntered(id = id, nickname = nickname)
+                if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "lobbyCode contains invalid characters"))
+                } else {
+                    buzzingSessionManager.onParticipantEntered(id = lobbyCode, nickname = nickname)
 
-                buzzingSessionManager.getBuzzerFlow(id = id)
-                    .onEach { buzzingSessionData ->
-                        val apiModel = BuzzerData(
-                            id = buzzingSessionData.id,
-                            participants = buzzingSessionData.participantsState.map { participantState ->
-                                BuzzerData.ParticipantState(
-                                    index = participantState.index,
-                                    name = participantState.name.preventXSS(),
-                                    buzzed = participantState.buzzed
-                                )
-                            }
-                        )
-                        send(json.encodeToString(BuzzerData.serializer(), apiModel))
-                    }
-                    .flowOn(Dispatchers.IO)
-                    .launchIn(this)
-
-                for (frame in incoming) {
-                    when (frame) {
-                        is Frame.Text -> {
-                            val receivedText = frame.readText()
-                            val incomingMessage = json.decodeFromString(IncomingMessage.serializer(), receivedText)
-                            when (incomingMessage.type) {
-                                IncomingMessage.Type.Buzz -> {
-                                    buzzingSessionManager.addBuzz(
-                                        id = id,
-                                        participantName = nickname
+                    buzzingSessionManager.getBuzzerFlow(id = lobbyCode)
+                        .onEach { buzzingSessionData ->
+                            val apiModel = BuzzerData(
+                                id = buzzingSessionData.id,
+                                participants = buzzingSessionData.participantsState.map { participantState ->
+                                    BuzzerData.ParticipantState(
+                                        index = participantState.index,
+                                        name = participantState.name.preventXSS(),
+                                        buzzed = participantState.buzzed
                                     )
                                 }
-                                IncomingMessage.Type.Clear -> {
-                                    //participants are not allowed to clear
+                            )
+                            send(json.encodeToString(BuzzerData.serializer(), apiModel))
+                        }
+                        .flowOn(Dispatchers.IO)
+                        .launchIn(this)
+
+                    for (frame in incoming) {
+                        when (frame) {
+                            is Frame.Text -> {
+                                val receivedText = frame.readText()
+                                val incomingMessage = json.decodeFromString(IncomingMessage.serializer(), receivedText)
+                                when (incomingMessage.type) {
+                                    IncomingMessage.Type.Buzz -> {
+                                        buzzingSessionManager.addBuzz(
+                                            id = lobbyCode,
+                                            participantName = nickname
+                                        )
+                                    }
+                                    IncomingMessage.Type.Clear -> {
+                                        //participants are not allowed to clear
+                                    }
                                 }
                             }
                         }
                     }
+                    if (debugEnabled) {
+                        println("Session closed for lobby $lobbyCode and nickname $nickname.")
+                        println("Closed reason: ${closeReason.await()}")
+                    }
+                    buzzingSessionManager.onParticipantLeft(id = lobbyCode, nickname = nickname)
                 }
-                if (debugEnabled) {
-                    println("Session closed for lobby $id and nickname $nickname.")
-                    println("Closed reason: ${closeReason.await()}")
-                }
-                buzzingSessionManager.onParticipantLeft(id = id, nickname = nickname)
             }
 
-            webSocket("host/{id}") {
+            webSocket("host/{lobbyCode}") {
 
-                val id = requireNotNull(call.parameters["id"]) { "path parameter {id} not set" }
+                val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "path parameter {lobbyCode} not set" }
 
-                buzzingSessionManager.onHostEntered(id = id)
+                if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "lobbyCode contains invalid characters"))
+                } else {
+                    buzzingSessionManager.onHostEntered(id = lobbyCode)
 
-                buzzingSessionManager.getBuzzerFlow(id = id)
-                    .onEach { buzzingSessionData ->
-                        val apiModel = BuzzerData(
-                            id = buzzingSessionData.id,
-                            participants = buzzingSessionData.participantsState.map { participantState ->
-                                BuzzerData.ParticipantState(
-                                    index = participantState.index,
-                                    name = participantState.name.preventXSS(),
-                                    buzzed = participantState.buzzed
-                                )
-                            }
-                        )
-                        send(json.encodeToString(BuzzerData.serializer(), apiModel))
-                    }
-                    .flowOn(Dispatchers.IO)
-                    .launchIn(this)
-
-                for (frame in incoming) {
-                    when (frame) {
-                        is Frame.Text -> {
-                            val receivedText = frame.readText()
-                            val incomingMessage = json.decodeFromString(IncomingMessage.serializer(), receivedText)
-                            when (incomingMessage.type) {
-                                IncomingMessage.Type.Clear -> {
-                                    buzzingSessionManager.clearBuzzes(
-                                        id = id
+                    buzzingSessionManager.getBuzzerFlow(id = lobbyCode)
+                        .onEach { buzzingSessionData ->
+                            val apiModel = BuzzerData(
+                                id = buzzingSessionData.id,
+                                participants = buzzingSessionData.participantsState.map { participantState ->
+                                    BuzzerData.ParticipantState(
+                                        index = participantState.index,
+                                        name = participantState.name.preventXSS(),
+                                        buzzed = participantState.buzzed
                                     )
                                 }
-                                IncomingMessage.Type.Buzz -> {
-                                    //Hosts are not allowed to buzz
+                            )
+                            send(json.encodeToString(BuzzerData.serializer(), apiModel))
+                        }
+                        .flowOn(Dispatchers.IO)
+                        .launchIn(this)
+
+                    for (frame in incoming) {
+                        when (frame) {
+                            is Frame.Text -> {
+                                val receivedText = frame.readText()
+                                val incomingMessage = json.decodeFromString(IncomingMessage.serializer(), receivedText)
+                                when (incomingMessage.type) {
+                                    IncomingMessage.Type.Clear -> {
+                                        buzzingSessionManager.clearBuzzes(
+                                            id = lobbyCode
+                                        )
+                                    }
+                                    IncomingMessage.Type.Buzz -> {
+                                        //Hosts are not allowed to buzz
+                                    }
                                 }
                             }
                         }
                     }
+                    if (debugEnabled) {
+                        println("Session closed for lobby $lobbyCode as host.")
+                        println("Closed reason: ${closeReason.await()}")
+                    }
+                    buzzingSessionManager.onHostLeft(id = lobbyCode)
                 }
-                if (debugEnabled) {
-                    println("Session closed for lobby $id as host.")
-                    println("Closed reason: ${closeReason.await()}")
-                }
-                buzzingSessionManager.onHostLeft(id = id)
             }
 
         }

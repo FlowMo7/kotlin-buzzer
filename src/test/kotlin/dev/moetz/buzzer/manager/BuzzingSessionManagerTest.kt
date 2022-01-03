@@ -4,6 +4,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.amshove.kluent.shouldBeEqualTo
+import org.amshove.kluent.shouldBeFalse
+import org.amshove.kluent.shouldBeTrue
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -114,6 +117,18 @@ class BuzzingSessionManagerTest {
             ),
             buzzingSessionManager.getBuzzerFlow("lobby1").first()
         )
+    }
+
+    @Test
+    fun testIsValidLobbyCodeLogic() {
+        runBlocking {
+            buzzingSessionManager.isValidLobbyCode("asdfAASD123123-_").shouldBeTrue()
+            buzzingSessionManager.isValidLobbyCode("asdg32649846c9").shouldBeTrue()
+            buzzingSessionManager.isValidLobbyCode("KJAGD8237648-_").shouldBeTrue()
+            buzzingSessionManager.isValidLobbyCode("invalid space").shouldBeFalse()
+            buzzingSessionManager.isValidLobbyCode("<script>").shouldBeFalse()
+            buzzingSessionManager.isValidLobbyCode("\"").shouldBeFalse()
+        }
     }
 
 }
