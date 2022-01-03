@@ -14,7 +14,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 
 
-fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSessionManager) {
+fun Application.configureWebSocket(
+    json: Json,
+    buzzingSessionManager: BuzzingSessionManager,
+    debugEnabled: Boolean
+) {
     routing {
         route("ws") {
 
@@ -62,8 +66,10 @@ fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSes
                         }
                     }
                 }
-                println("Session closed for lobby $id and nickname $nickname.")
-                println("Closed reason: ${closeReason.await()}")
+                if (debugEnabled) {
+                    println("Session closed for lobby $id and nickname $nickname.")
+                    println("Closed reason: ${closeReason.await()}")
+                }
                 buzzingSessionManager.onParticipantLeft(id = id, nickname = nickname)
             }
 
@@ -108,8 +114,10 @@ fun Application.configureWebSocket(json: Json, buzzingSessionManager: BuzzingSes
                         }
                     }
                 }
-                println("Session closed for lobby $id as host.")
-                println("Closed reason: ${closeReason.await()}")
+                if (debugEnabled) {
+                    println("Session closed for lobby $id as host.")
+                    println("Closed reason: ${closeReason.await()}")
+                }
                 buzzingSessionManager.onHostLeft(id = id)
             }
 

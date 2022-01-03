@@ -53,8 +53,16 @@ fun main() {
             anyHost()
         }
 
-        configure(buzzingSessionManager, publicHostname, isSecure)
+        configure(
+            buzzingSessionManager = buzzingSessionManager,
+            publicHostname = publicHostname,
+            isSecure = isSecure
+        )
         configureStatic()
-        configureWebSocket(Json, buzzingSessionManager)
+        configureWebSocket(
+            json = Json,
+            buzzingSessionManager = buzzingSessionManager,
+            debugEnabled = debugLogsEnabled
+        )
     }.start(wait = true)
 }
