@@ -132,7 +132,7 @@ fun Application.configure(
         get("status") {
             // any problems would arise at startup anyways, so once the webserver is alive, we are good to go to say
             // we are healthy
-            call.respond(HttpStatusCode.OK, "Healthy")
+            call.respond(HttpStatusCode.NoContent)
         }
 
         post("create") {
