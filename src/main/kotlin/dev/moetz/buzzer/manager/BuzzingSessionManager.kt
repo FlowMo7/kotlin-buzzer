@@ -115,58 +115,63 @@ class BuzzingSessionManager(
     }
 
     suspend fun addBuzz(id: String, participantName: String) {
-        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "$participantName buzzed")
         val flow = getOrAddBuzzingSessionStateFlow(id)
         flowMutationMutex.withLock {
-            flow.value = flow.value.let { currentState ->
-                currentState.copy(
-                    participantsState = currentState.participantsState
-                        .toMutableList()
-                        .let { list ->
-                            if (list.any { it.name == participantName }) {
-                                val indexOfLastBuzzed = list.indexOfLast { it.buzzed == true }
-                                list
-                                    .mapIndexed { index, participantState ->
-                                        if (participantState.name == participantName) {
-                                            participantState.copy(
-                                                buzzed = true,
-                                                index = indexOfLastBuzzed + 1
-                                            )
-                                        } else {
-                                            if (index > indexOfLastBuzzed) {
+            val alreadyBuzzed = flow.value.participantsState.any { it.name == participantName && it.buzzed == true }
+            if (alreadyBuzzed) {
+                //Nothing to do here
+            } else {
+                buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "$participantName buzzed")
+                flow.value = flow.value.let { currentState ->
+                    currentState.copy(
+                        participantsState = currentState.participantsState
+                            .toMutableList()
+                            .let { list ->
+                                if (list.any { it.name == participantName }) {
+                                    val indexOfLastBuzzed = list.indexOfLast { it.buzzed == true }
+                                    list
+                                        .mapIndexed { index, participantState ->
+                                            if (participantState.name == participantName) {
+                                                participantState.copy(
+                                                    buzzed = true,
+                                                    index = indexOfLastBuzzed + 1
+                                                )
+                                            } else {
+                                                if (index > indexOfLastBuzzed) {
+                                                    participantState.copy(index = participantState.index + 1)
+                                                } else {
+                                                    participantState
+                                                }
+                                            }
+                                        }
+                                        .sortedBy { it.index }
+                                } else {
+                                    val indexToInsertAt = list
+                                        .indexOfLast { it.buzzed == true }
+                                        .let {
+                                            if (it == -1) {
+                                                0
+                                            } else {
+                                                it + 1
+                                            }
+                                        }
+                                    list.add(
+                                        indexToInsertAt,
+                                        BuzzingSessionData.ParticipantState(indexToInsertAt, participantName, true)
+                                    )
+                                    list
+                                        .mapIndexed { index, participantState ->
+                                            if (participantState.buzzed.not()) {
                                                 participantState.copy(index = participantState.index + 1)
                                             } else {
                                                 participantState
                                             }
                                         }
-                                    }
-                                    .sortedBy { it.index }
-                            } else {
-                                val indexToInsertAt = list
-                                    .indexOfLast { it.buzzed == true }
-                                    .let {
-                                        if (it == -1) {
-                                            0
-                                        } else {
-                                            it + 1
-                                        }
-                                    }
-                                list.add(
-                                    indexToInsertAt,
-                                    BuzzingSessionData.ParticipantState(indexToInsertAt, participantName, true)
-                                )
-                                list
-                                    .mapIndexed { index, participantState ->
-                                        if (participantState.buzzed.not()) {
-                                            participantState.copy(index = participantState.index + 1)
-                                        } else {
-                                            participantState
-                                        }
-                                    }
-                                    .sortedBy { it.index }
+                                        .sortedBy { it.index }
+                                }
                             }
-                        }
-                )
+                    )
+                }
             }
         }
     }
