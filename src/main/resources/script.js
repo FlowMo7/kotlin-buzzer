@@ -15,7 +15,9 @@ function buildParticipantsList(participants) {
         return '<i>No participants yet</i>';
     } else {
         var text = '<ul>'
-        participants.forEach(function (item) {
+        let sortedParticipants = participants;
+        sortedParticipants.sort();
+        sortedParticipants.forEach(function (item) {
             text += '<li>' + item.name + '</li>';
         })
         text += '</ul>';
