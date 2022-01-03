@@ -16,7 +16,7 @@ function buildParticipantsList(participants) {
     } else {
         var text = '<ul>'
         let sortedParticipants = participants;
-        sortedParticipants.sort();
+        sortedParticipants.sort((a, b) => a.name.localeCompare(b.name));
         sortedParticipants.forEach(function (item) {
             text += '<li>' + item.name + '</li>';
         })
