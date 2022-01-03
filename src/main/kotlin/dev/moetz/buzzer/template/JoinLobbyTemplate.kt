@@ -14,13 +14,13 @@ class JoinLobbyTemplate(
                     br()
                     textInput(name = "lobbyCode", classes = "form-input") {
                         required = true
-                        pattern = "[a-zA-Z0-9-_]"
+                        pattern = "[a-zA-Z0-9-_]+"
                         placeholder = "Lobby-Code"
                     }
                     textInput(name = "nickname", classes = "form-input") {
                         required = true
                         placeholder = "Nickname"
-                        pattern = "[a-zA-Z0-9-_ ]"
+                        pattern = "[a-zA-Z0-9-_\\s]+"
                     }
                     submitInput(classes = "form-button centered centered-text") {
                         value = "Join"
@@ -36,7 +36,7 @@ class JoinLobbyTemplate(
                     textInput(name = "nickname", classes = "form-input") {
                         required = true
                         placeholder = "Nickname"
-                        pattern = "[a-zA-Z0-9-_ ]"
+                        pattern = "[a-zA-Z0-9-_\\s]+"
                     }
 
                     hiddenInput(name = "lobbyCode") {
