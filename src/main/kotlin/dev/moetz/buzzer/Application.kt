@@ -42,8 +42,27 @@ fun main() {
         install(DefaultHeaders)
         install(AutoHeadResponse)
         install(CachingHeaders) {
-            options {
-                CachingOptions(CacheControl.NoCache(CacheControl.Visibility.Public))
+            options { outgoingContent ->
+                when (outgoingContent.contentType?.withoutParameters()) {
+                    ContentType.Text.CSS,
+                    ContentType.Text.JavaScript,
+                    ContentType.Application.JavaScript,
+                    ContentType("application", "x-font-ttf"),
+                    ContentType("application", "manifest+json"),
+                    ContentType.Image.PNG -> {
+                        CachingOptions(
+                            CacheControl.MaxAge(
+                                maxAgeSeconds = 24 * 60 * 60,    //24 hours
+                                visibility = CacheControl.Visibility.Public
+                            )
+                        )
+                    }
+                    ContentType.Application.Json,
+                    ContentType.Text.Plain -> {
+                        CachingOptions(CacheControl.NoCache(null))
+                    }
+                    else -> null
+                }
             }
         }
         install(ContentNegotiation) {
