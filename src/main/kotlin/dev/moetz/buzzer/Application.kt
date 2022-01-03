@@ -21,7 +21,7 @@ import java.time.Duration
 fun main() {
 
     val isSecure = System.getenv("IS_SECURE")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: false
-    val publicHostname = System.getenv("PUBLIC_HOSTNAME")?.takeIf { it.isNotBlank() } ?: "localhost:8080"
+    val publicHostname = System.getenv("DOMAIN")?.takeIf { it.isNotBlank() } ?: "localhost:8080"
     val debugLogsEnabled = System.getenv("ENABLE_DEBUG_LOGS")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: true
     val logFilePath = "/etc/log/kotlin-buzzer"
 
