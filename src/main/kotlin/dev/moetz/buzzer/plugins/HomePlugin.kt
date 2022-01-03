@@ -21,9 +21,7 @@ fun Application.configure(
     routing {
 
         get {
-            call.respondHtmlTemplate(SiteTemplate()) {
-                siteTitle { +"Buzzer" }
-
+            call.respondHtmlTemplate(SiteTemplate("Buzzer")) {
                 content {
                     div(classes = "header") {
                         h2 { +"Buzzer" }
@@ -60,12 +58,15 @@ fun Application.configure(
                 } else if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
                 } else {
-                    call.respondHtmlTemplate(SiteTemplate()) {
-                        siteTitle { +"Buzzer" }
-
+                    call.respondHtmlTemplate(
+                        SiteTemplate(
+                            siteTitle = "Buzzer",
+                            description = "You're invited to join an online buzzing session."
+                        )
+                    ) {
                         content {
                             div(classes = "header") {
-                                h2 { +"Buzzer" }
+                                h2 { +"Join a Buzzing Lobby" }
                             }
 
                             insert(JoinLobbyTemplate(lobbyCode = lobbyCode)) {
@@ -100,9 +101,7 @@ fun Application.configure(
             if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
             } else {
-                call.respondHtmlTemplate(SiteTemplate()) {
-                    siteTitle { +"Buzzer" }
-
+                call.respondHtmlTemplate(SiteTemplate("Buzzer")) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
                             +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
@@ -148,9 +147,7 @@ fun Application.configure(
             if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
             } else {
-                call.respondHtmlTemplate(SiteTemplate()) {
-                    siteTitle { +"Buzzer Host" }
-
+                call.respondHtmlTemplate(SiteTemplate("Buzzer Host")) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
                             +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
