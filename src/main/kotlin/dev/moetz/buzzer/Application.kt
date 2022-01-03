@@ -68,7 +68,6 @@ fun main() {
         install(ContentNegotiation) {
             json()
         }
-        install(CORS)
 
         configure(
             buzzingSessionManager = buzzingSessionManager,
