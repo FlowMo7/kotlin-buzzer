@@ -1,5 +1,7 @@
 package dev.moetz.buzzer.manager
 
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -9,10 +11,15 @@ import org.junit.Test
 class BuzzingSessionManagerTest {
 
     private lateinit var buzzingSessionManager: BuzzingSessionManager
+    private lateinit var buzzLogging: BuzzLogging
 
     @Before
     fun setUp() {
-        buzzingSessionManager = BuzzingSessionManager()
+        buzzLogging = mockk(relaxed = true)
+
+        buzzingSessionManager = BuzzingSessionManager(
+            buzzLogging = buzzLogging
+        )
     }
 
     @Test
@@ -26,6 +33,8 @@ class BuzzingSessionManagerTest {
         )
 
         buzzingSessionManager.addBuzz("lobby1", "Participant1")
+
+        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
 
         assertEquals(
             BuzzingSessionManager.BuzzingSessionData(
@@ -54,6 +63,8 @@ class BuzzingSessionManagerTest {
 
         buzzingSessionManager.addBuzz("lobby1", "Participant1")
 
+        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
+
         assertEquals(
             BuzzingSessionManager.BuzzingSessionData(
                 id = "lobby1",
@@ -70,6 +81,8 @@ class BuzzingSessionManagerTest {
 
         buzzingSessionManager.clearBuzzes("lobby1")
 
+        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Host, "buzzes cleared") }
+
         assertEquals(
             BuzzingSessionManager.BuzzingSessionData(
                 id = "lobby1",
@@ -85,6 +98,8 @@ class BuzzingSessionManagerTest {
         )
 
         buzzingSessionManager.addBuzz("lobby1", "Participant1")
+
+        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
 
         assertEquals(
             BuzzingSessionManager.BuzzingSessionData(

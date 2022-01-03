@@ -115,7 +115,7 @@ class BuzzingSessionManager(
     }
 
     suspend fun addBuzz(id: String, participantName: String) {
-        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "buzzed")
+        buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "$participantName buzzed")
         val flow = getOrAddBuzzingSessionStateFlow(id)
         flowMutationMutex.withLock {
             flow.value = flow.value.let { currentState ->
