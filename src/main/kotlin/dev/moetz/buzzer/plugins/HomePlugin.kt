@@ -112,25 +112,27 @@ fun Application.configure(
                         h3 { +"Buzzer" }
                     }
 
-                    span {
-                        id = "connection_status"
-                        style = "color: red;"
-                    }
-                    br()
-
-                    p {
-                        +"Your nickname:"
-                        unsafe { +"&nbsp;" }
-                        i {
-                            +nickname
+                    div(classes = "centered centered-text") {
+                        span {
+                            id = "connection_status"
+                            style = "color: red;"
                         }
-                    }
+                        br()
 
-                    div {
-                        button(classes = "buzzer") {
-                            id = "buzzer_button"
-                            onClick = "sendBuzz();"
-                            +"Buzz"
+                        p {
+                            +"Your nickname:"
+                            unsafe { +"&nbsp;" }
+                            i {
+                                +nickname
+                            }
+                        }
+
+                        div {
+                            button(classes = "buzzer") {
+                                id = "buzzer_button"
+                                onClick = "sendBuzz();"
+                                +"Buzz"
+                            }
                         }
                     }
                 }
