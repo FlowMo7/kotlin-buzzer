@@ -109,7 +109,7 @@ fun Application.configure(
                 call.respondHtmlTemplate(SiteTemplate("Buzzer")) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
+                            unsafe { +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }
                         }
                     }
 
@@ -155,7 +155,7 @@ fun Application.configure(
                 call.respondHtmlTemplate(SiteTemplate("Buzzer Host")) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };"
+                            unsafe { +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }
                         }
                     }
 
