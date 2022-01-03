@@ -16,7 +16,7 @@ build application:
     - ./gradlew clean build test shadowJar
   artifacts:
     paths:
-      - build/libs/DeadDrop.jar
+      - build/libs/Buzzer.jar
   tags:
     - maven
 

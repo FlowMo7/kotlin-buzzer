@@ -28,13 +28,13 @@ The server stores no state (or better: lobby-state is only stored in-memory), th
 
 ```yaml
 services:
-  dead-drop:
+  buzzer:
     image: "flowmo7/kotlin-buzzer:master"
     restart: unless-stopped
     ports:
       - 8080:8080 #Should be behind an SSL reverse proxy
     environment:
-      - DOMAIN=drop.example.org
+      - DOMAIN=buzzer.example.org
     volumes:
       - /srv/docker/buzzer/logs:/etc/log/kotlin-buzzer:rw
 ```
