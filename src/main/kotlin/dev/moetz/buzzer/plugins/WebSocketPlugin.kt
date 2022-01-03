@@ -37,7 +37,7 @@ fun Application.configureWebSocket(
                             participants = buzzingSessionData.participantsState.map { participantState ->
                                 BuzzerData.ParticipantState(
                                     index = participantState.index,
-                                    name = participantState.name,
+                                    name = participantState.name.preventXSS(),
                                     buzzed = participantState.buzzed
                                 )
                             }
@@ -86,7 +86,7 @@ fun Application.configureWebSocket(
                             participants = buzzingSessionData.participantsState.map { participantState ->
                                 BuzzerData.ParticipantState(
                                     index = participantState.index,
-                                    name = participantState.name,
+                                    name = participantState.name.preventXSS(),
                                     buzzed = participantState.buzzed
                                 )
                             }
@@ -124,4 +124,15 @@ fun Application.configureWebSocket(
         }
 
     }
+}
+
+
+/**
+ * Just a small thing to prevent script injections using names.
+ */
+private fun String.preventXSS(): String {
+    return this
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
 }
