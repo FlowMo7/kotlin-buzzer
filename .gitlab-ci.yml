@@ -1,7 +1,8 @@
 variables:
-  COMPONENT_IMAGE: registry.moetz.dev/buzzer:$CI_BUILD_REF_NAME
-  COMPONENT_BRANCH_IMAGE: registry.moetz.dev/buzzer:$CI_COMMIT_REF_NAME
-  COMPONENT_LATEST_IMAGE: registry.moetz.dev/buzzer:latest
+  COMPONENT_IMAGE_PRIVATE_REGISTRY: registry.moetz.dev/kotlin-buzzer:$CI_BUILD_REF_NAME
+  COMPONENT_LATEST_IMAGE_PRIVATE_REGISTRY: registry.moetz.dev/kotlin-buzzer:latest
+  COMPONENT_IMAGE_DOCKER_HUB: flowmo7/kotlin-buzzer:$CI_BUILD_REF_NAME
+  COMPONENT_LATEST_IMAGE_DOCKER_HUB: flowmo7/kotlin-buzzer:latest
 
 stages:
   - build_application
@@ -12,20 +13,28 @@ stages:
 build application:
   stage: build_application
   script:
-    - ./gradlew clean build shadowJar
+    - ./gradlew clean build test shadowJar
   artifacts:
     paths:
-      - build/libs/Buzzer.jar
+      - build/libs/DeadDrop.jar
   tags:
     - maven
 
-build and push:
+build and push private registry:
   stage: build_image
   script:
-    - echo $COMPONENT_IMAGE
-    - docker build --pull -t $COMPONENT_IMAGE ./
+    - docker build --pull -t $COMPONENT_IMAGE_PRIVATE_REGISTRY ./
     - docker login -u $REGISTRY_MOETZ_DEV_USERNAME -p $REGISTRY_MOETZ_DEV_PASSWORD registry.moetz.dev
-    - docker push $COMPONENT_IMAGE
+    - docker push $COMPONENT_IMAGE_PRIVATE_REGISTRY
+  tags:
+    - docker
+
+build and push docker hub:
+  stage: build_image
+  script:
+    - docker build --pull -t $COMPONENT_IMAGE_DOCKER_HUB ./
+    - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+    - docker push $COMPONENT_IMAGE_DOCKER_HUB
   tags:
     - docker
   only:
@@ -33,24 +42,26 @@ build and push:
     - master
     - tags
 
-tag latest:
+tag latest private registry:
   stage: tag_image
   script:
     - docker login -u $REGISTRY_MOETZ_DEV_USERNAME -p $REGISTRY_MOETZ_DEV_PASSWORD registry.moetz.dev
-    - docker pull $COMPONENT_IMAGE
-    - docker tag $COMPONENT_IMAGE $COMPONENT_LATEST_IMAGE
-    - docker push $COMPONENT_LATEST_IMAGE
+    - docker pull $COMPONENT_IMAGE_PRIVATE_REGISTRY
+    - docker tag $COMPONENT_IMAGE_PRIVATE_REGISTRY $COMPONENT_LATEST_IMAGE_PRIVATE_REGISTRY
+    - docker push $COMPONENT_LATEST_IMAGE_PRIVATE_REGISTRY
   tags:
     - docker
   only:
     - master
 
-tag branch name:
+tag latest docker hub:
   stage: tag_image
   script:
-    - docker login -u $REGISTRY_MOETZ_DEV_USERNAME -p $REGISTRY_MOETZ_DEV_PASSWORD registry.moetz.dev
-    - docker pull $COMPONENT_IMAGE
-    - docker tag $COMPONENT_IMAGE $COMPONENT_BRANCH_IMAGE
-    - docker push $COMPONENT_BRANCH_IMAGE
+    - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+    - docker pull $COMPONENT_IMAGE_DOCKER_HUB
+    - docker tag $COMPONENT_IMAGE_DOCKER_HUB $COMPONENT_LATEST_IMAGE_DOCKER_HUB
+    - docker push $COMPONENT_LATEST_IMAGE_DOCKER_HUB
   tags:
     - docker
+  only:
+    - master
