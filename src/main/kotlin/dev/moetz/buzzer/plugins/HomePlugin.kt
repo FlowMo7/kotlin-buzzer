@@ -1,6 +1,9 @@
 package dev.moetz.buzzer.plugins
 
 import dev.moetz.buzzer.manager.BuzzingSessionManager
+import dev.moetz.buzzer.template.CreateLobbyTemplate
+import dev.moetz.buzzer.template.JoinLobbyTemplate
+import dev.moetz.buzzer.template.SiteTemplate
 import io.ktor.application.*
 import io.ktor.html.*
 import io.ktor.http.*
@@ -8,98 +11,6 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import kotlinx.html.*
-
-class SiteTemplate : Template<HTML> {
-
-    val siteTitle = Placeholder<TITLE>()
-    val content = Placeholder<FlowContent>()
-
-    val additionalHeadStuff = Placeholder<HEAD>()
-
-    override fun HTML.apply() {
-        head {
-            meta(charset = "utf-8")
-            title { insert(siteTitle) }
-            script(type = "text/javascript", src = "/static/reconnecting-websocket.min.js") {
-
-            }
-            script(type = "text/javascript", src = "/static/websocket.js") {
-
-            }
-            script(type = "text/javascript", src = "/static/script.js") {
-
-            }
-            link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
-            insert(additionalHeadStuff)
-        }
-        body {
-            main {
-                insert(content)
-            }
-        }
-    }
-
-}
-
-
-class CreateLobbyTemplate : Template<FlowContent> {
-    override fun FlowContent.apply() {
-        div(classes = "centered") {
-            form(action = "/create", method = FormMethod.post) {
-                submitInput(classes = "form-button centered centered-text") {
-                    value = "Create New Lobby"
-                }
-            }
-        }
-        br()
-    }
-}
-
-class JoinLobbyTemplate(
-    private val lobbyCode: String?
-) : Template<FlowContent> {
-    override fun FlowContent.apply() {
-        if (lobbyCode == null) {
-            div(classes = "centered") {
-                form(action = "/join", method = FormMethod.post) {
-                    span(classes = "centered-text") { +"Join a Lobby:" }
-                    br()
-                    textInput(name = "lobbyCode", classes = "form-input") {
-                        required = true
-                        placeholder = "Lobby-Code"
-                    }
-                    textInput(name = "nickname", classes = "form-input") {
-                        required = true
-                        placeholder = "Nickname"
-                    }
-                    submitInput(classes = "form-button centered centered-text") {
-                        value = "Join"
-                    }
-
-                }
-            }
-        } else {
-            div(classes = "centered") {
-                form(action = "/join", method = FormMethod.post) {
-                    +"Enter a nickname to join the lobby:"
-                    br()
-                    textInput(name = "nickname", classes = "form-input") {
-                        required = true
-                        placeholder = "Nickname"
-                    }
-
-                    hiddenInput(name = "lobbyCode") {
-                        value = lobbyCode
-                    }
-
-                    submitInput(classes = "form-button centered centered-text") {
-                        value = "Join"
-                    }
-                }
-            }
-        }
-    }
-}
 
 fun Application.configure(
     buzzingSessionManager: BuzzingSessionManager,
