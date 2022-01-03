@@ -6,4 +6,6 @@ WORKDIR /usr/src/buzzer
 
 EXPOSE 8080
 
+HEALTHCHECK CMD curl -f http://0.0.0.0:8080/status || exit 1
+
 CMD ["java", "-jar", "Buzzer.jar"]
