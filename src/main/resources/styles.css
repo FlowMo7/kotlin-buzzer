@@ -27,7 +27,7 @@
 .form-button {
     padding: 1.4em 1.4em;
     font-size: 1.2em;
-    background-color: #161D99;
+    background-color: var(--button-color);
     width: 100%;
     color: #FFFFFF;
     cursor: pointer;
@@ -55,7 +55,7 @@
 .buzzer {
     height: 10em;
     font-size: 2em;
-    color: rgb(18, 30, 102);
+    color: var(--button-color);
     padding: 1.4em 1.4em;
     cursor: pointer;
     border: 0;
@@ -67,11 +67,11 @@
 }
 
 .buzzer-ready {
-    background-color: limegreen;
+    background-color: var(--button-buzzer-ready);
 }
 
 .buzzer-buzzed {
-    background-color: cornflowerblue;
+    background-color: var(--button-buzzer-buzzed);
 }
 
 .host-buzz-entry {

@@ -18,6 +18,9 @@ Possible environment variables:
 * `DOMAIN`: The domain this application is available at, e.g. `buzzer.example.org`
 * `IS_SECURE`: Whether this application is available as HTTPS / behind an HTTPS reverse proxy (which it should be). Default to `true`.
 * `ENABLE_DEBUG_LOGS`: Whether the application (server-side) should output a bit more information, and also print the buzz log to stdout. Defaults to `false`.
+* `COLOR_FORM_BUTTON`: The color of the buttons before joining a lobby (on the index page). Defaults to `#161D99`.
+* `COLOR_BUZZER_BUTTON_READY`: The color of the buzzer button. Defaults to `limegreen`.
+* `COLOR_BUZZER_BUTTON_BUZZED`: The color of the buzzer button when already buzzed. Defaults to `cornflowerblue`.
 
 ### Data persistence
 

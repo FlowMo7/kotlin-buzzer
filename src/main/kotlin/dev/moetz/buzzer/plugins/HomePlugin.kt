@@ -15,13 +15,23 @@ import kotlinx.html.*
 fun Application.configure(
     buzzingSessionManager: BuzzingSessionManager,
     publicHostname: String,
-    isSecure: Boolean
+    isSecure: Boolean,
+    formButtonColor: String,
+    buzzerButtonColorReady: String,
+    buzzerButtonColorBuzzed: String
 ) {
 
     routing {
 
         get {
-            call.respondHtmlTemplate(SiteTemplate("Buzzer")) {
+            call.respondHtmlTemplate(
+                SiteTemplate(
+                    siteTitle = "Buzzer",
+                    formButtonColor = formButtonColor,
+                    buzzerButtonColorReady = buzzerButtonColorReady,
+                    buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                )
+            ) {
                 content {
                     div(classes = "header") {
                         h2 { +"Buzzer" }
@@ -67,7 +77,10 @@ fun Application.configure(
                     call.respondHtmlTemplate(
                         SiteTemplate(
                             siteTitle = "Buzzer",
-                            description = "You're invited to join an online buzzing session."
+                            description = "You're invited to join an online buzzing session.",
+                            formButtonColor = formButtonColor,
+                            buzzerButtonColorReady = buzzerButtonColorReady,
+                            buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
                         )
                     ) {
                         content {
@@ -112,7 +125,14 @@ fun Application.configure(
             } else if (buzzingSessionManager.isValidNickname(nickname).not()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid nickname characters")
             } else {
-                call.respondHtmlTemplate(SiteTemplate("Buzzer")) {
+                call.respondHtmlTemplate(
+                    SiteTemplate(
+                        siteTitle = "Buzzer",
+                        formButtonColor = formButtonColor,
+                        buzzerButtonColorReady = buzzerButtonColorReady,
+                        buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                    )
+                ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
                             unsafe { +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }
@@ -158,7 +178,14 @@ fun Application.configure(
             if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
             } else {
-                call.respondHtmlTemplate(SiteTemplate("Buzzer Host")) {
+                call.respondHtmlTemplate(
+                    SiteTemplate(
+                        siteTitle = "Buzzer Host",
+                        formButtonColor = formButtonColor,
+                        buzzerButtonColorReady = buzzerButtonColorReady,
+                        buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                    )
+                ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
                             unsafe { +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }

@@ -23,6 +23,12 @@ fun main() {
     val isSecure = System.getenv("IS_SECURE")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: false
     val publicHostname = System.getenv("DOMAIN")?.takeIf { it.isNotBlank() } ?: "localhost:8080"
     val debugLogsEnabled = System.getenv("ENABLE_DEBUG_LOGS")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: true
+
+    val formButtonColor = System.getenv("COLOR_FORM_BUTTON")?.takeIf { it.isNotBlank() } ?: "#161D99"
+    val buzzerButtonColorReady = System.getenv("COLOR_BUZZER_BUTTON_READY")?.takeIf { it.isNotBlank() } ?: "limegreen"
+    val buzzerButtonColorBuzzed =
+        System.getenv("COLOR_BUZZER_BUTTON_BUZZED")?.takeIf { it.isNotBlank() } ?: "cornflowerblue"
+
     val logFilePath = "/etc/log/kotlin-buzzer"
 
 
@@ -72,7 +78,10 @@ fun main() {
         configure(
             buzzingSessionManager = buzzingSessionManager,
             publicHostname = publicHostname,
-            isSecure = isSecure
+            isSecure = isSecure,
+            formButtonColor = formButtonColor,
+            buzzerButtonColorReady = buzzerButtonColorReady,
+            buzzerButtonColorBuzzed = buzzerButtonColorBuzzed
         )
         configureStatic()
         configureWebSocket(

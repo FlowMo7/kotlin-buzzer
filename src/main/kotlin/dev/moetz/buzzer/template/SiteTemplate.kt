@@ -3,7 +3,13 @@ package dev.moetz.buzzer.template
 import io.ktor.html.*
 import kotlinx.html.*
 
-class SiteTemplate(private val siteTitle: String, private val description: String = "Online buzzing system for party games.") : Template<HTML> {
+class SiteTemplate(
+    private val siteTitle: String,
+    private val description: String = "Online buzzing system for party games.",
+    private val formButtonColor: String,
+    private val buzzerButtonColorReady: String,
+    private val buzzerButtonColorBuzzed: String
+) : Template<HTML> {
 
     val content = Placeholder<FlowContent>()
 
@@ -23,6 +29,17 @@ class SiteTemplate(private val siteTitle: String, private val description: Strin
             script(type = "text/javascript", src = "/static/script.js") {
 
             }
+
+            style {
+                unsafe {
+                    +":root {"
+                    +"--button-color: $formButtonColor;"
+                    +"--button-buzzer-ready: $buzzerButtonColorReady;"
+                    +"--button-buzzer-buzzed: $buzzerButtonColorBuzzed;"
+                    +"}"
+                }
+            }
+
             link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
 
             meta(name = "robots", content = "index, follow")
