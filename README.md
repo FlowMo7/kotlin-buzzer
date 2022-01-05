@@ -49,7 +49,7 @@ This project is inspired by [bufferapp/buzzer](https://github.com/bufferapp/buzz
 # LICENSE
 
 ```
-Copyright 2021 Florian Mötz
+Copyright 2021-2022 Florian Mötz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
