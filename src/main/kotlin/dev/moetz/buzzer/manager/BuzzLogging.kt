@@ -1,5 +1,10 @@
 package dev.moetz.buzzer.manager
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.time.OffsetDateTime
 import java.time.ZoneId
@@ -40,15 +45,23 @@ class BuzzLogging(
         Participant, Host
     }
 
+    private val logFileWriteMutex = Mutex()
+
     fun log(lobby: String, role: Role, message: String) {
-        val dateTimeString = OffsetDateTime.now()
-            .atZoneSameInstant(ZoneId.of("UTC"))
-            .format(dateTimeFormat)
-        val logLine = dateTimeString + " #$lobby [${role.name}] $message"
-        if (alsoLogToStdout) {
-            println(logLine)
+        val dateTime = OffsetDateTime.now()
+
+        GlobalScope.launch(context = Dispatchers.IO) {
+            logFileWriteMutex.withLock {
+                val dateTimeString = dateTime
+                    .atZoneSameInstant(ZoneId.of("UTC"))
+                    .format(dateTimeFormat)
+                val logLine = dateTimeString + " #$lobby [${role.name}] $message"
+                if (alsoLogToStdout) {
+                    println(logLine)
+                }
+                logFile.appendText(logLine + "\n")
+            }
         }
-        logFile.appendText(logLine + "\n")
     }
 
 }
