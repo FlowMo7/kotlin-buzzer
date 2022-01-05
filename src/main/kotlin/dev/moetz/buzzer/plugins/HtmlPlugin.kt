@@ -219,7 +219,7 @@ fun Application.configure(
                                     append(publicHostname)
                                     append("/join/$lobbyCode")
                                 }
-                                a(href = lobbyJoinUrl) { +lobbyJoinUrl }
+                                a(href = lobbyJoinUrl, target = "_blank") { +lobbyJoinUrl }
                             }
 
                             div {
