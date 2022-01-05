@@ -67,6 +67,10 @@ fun Application.configure(
 
         route("join") {
 
+            get {
+                call.respondRedirect(url = "/", permanent = false)
+            }
+
             get("{lobbyCode}") {
                 val lobbyCode = call.parameters["lobbyCode"]?.ifBlank { null }
                 if (lobbyCode == null) {
