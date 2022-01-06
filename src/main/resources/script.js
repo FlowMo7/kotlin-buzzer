@@ -127,5 +127,9 @@ function withLeadingZero(number, threeDigits = false) {
 
 function getMilliseconds(date) {
     let split = date.split('.');
-    return Math.round(parseInt(split[1]) / 1000);
+    if (split.length > 3) {
+        return Math.round(parseInt(split[1]));
+    } else {
+        return Math.round(parseInt(split[1]) / 1000);
+    }
 }
