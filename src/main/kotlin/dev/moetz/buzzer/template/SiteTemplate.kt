@@ -12,6 +12,7 @@ class SiteTemplate(
 ) : Template<HTML> {
 
     val content = Placeholder<FlowContent>()
+    val footerContent = Placeholder<FlowContent>()
 
     val additionalHeadStuff = Placeholder<HEAD>()
 
@@ -53,6 +54,9 @@ class SiteTemplate(
         body {
             main {
                 insert(content)
+            }
+            footer {
+                insert(footerContent)
             }
         }
     }

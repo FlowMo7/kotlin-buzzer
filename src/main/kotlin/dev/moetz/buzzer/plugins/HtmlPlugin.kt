@@ -2,6 +2,7 @@ package dev.moetz.buzzer.plugins
 
 import dev.moetz.buzzer.manager.BuzzingSessionManager
 import dev.moetz.buzzer.template.CreateLobbyTemplate
+import dev.moetz.buzzer.template.InfoSiteTemplate
 import dev.moetz.buzzer.template.JoinLobbyTemplate
 import dev.moetz.buzzer.template.SiteTemplate
 import io.ktor.application.*
@@ -42,6 +43,33 @@ fun Application.configure(
                     }
 
                     insert(JoinLobbyTemplate(lobbyCode = null)) {
+
+                    }
+                }
+
+                footerContent {
+                    div(classes = "right-aligned") {
+                        a(href = "/info") {+"Information"}
+                    }
+                }
+            }
+        }
+
+        get("info") {
+            call.respondHtmlTemplate(
+                SiteTemplate(
+                    siteTitle = "Buzzer - Info",
+                    formButtonColor = formButtonColor,
+                    buzzerButtonColorReady = buzzerButtonColorReady,
+                    buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                )
+            ) {
+                content {
+                    div(classes = "header") {
+                        h2 { +"Information" }
+                    }
+
+                    insert(InfoSiteTemplate()) {
 
                     }
                 }
