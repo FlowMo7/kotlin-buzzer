@@ -10,9 +10,23 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 
+private fun BuzzingSessionManager.BuzzingSessionData.toBuzzerData(): BuzzerData {
+    return BuzzerData(
+        id = this.id,
+        participants = this.participantsState.map { participantState ->
+            BuzzerData.ParticipantState(
+                index = participantState.index,
+                name = participantState.name.preventXSS(),
+                buzzed = participantState.buzzed,
+                buzzedAt = participantState.buzzedAt
+            )
+        }
+    )
+}
 
 fun Application.configureWebSocket(
     json: Json,
@@ -35,19 +49,8 @@ fun Application.configureWebSocket(
                     buzzingSessionManager.onParticipantEntered(id = lobbyCode, nickname = nickname)
 
                     buzzingSessionManager.getBuzzerFlow(id = lobbyCode)
-                        .onEach { buzzingSessionData ->
-                            val apiModel = BuzzerData(
-                                id = buzzingSessionData.id,
-                                participants = buzzingSessionData.participantsState.map { participantState ->
-                                    BuzzerData.ParticipantState(
-                                        index = participantState.index,
-                                        name = participantState.name.preventXSS(),
-                                        buzzed = participantState.buzzed
-                                    )
-                                }
-                            )
-                            send(json.encodeToString(BuzzerData.serializer(), apiModel))
-                        }
+                        .map { it.toBuzzerData() }
+                        .onEach { buzzerData -> send(json.encodeToString(BuzzerData.serializer(), buzzerData)) }
                         .flowOn(Dispatchers.IO)
                         .launchIn(this)
 
@@ -88,19 +91,8 @@ fun Application.configureWebSocket(
                     buzzingSessionManager.onHostEntered(id = lobbyCode)
 
                     buzzingSessionManager.getBuzzerFlow(id = lobbyCode)
-                        .onEach { buzzingSessionData ->
-                            val apiModel = BuzzerData(
-                                id = buzzingSessionData.id,
-                                participants = buzzingSessionData.participantsState.map { participantState ->
-                                    BuzzerData.ParticipantState(
-                                        index = participantState.index,
-                                        name = participantState.name.preventXSS(),
-                                        buzzed = participantState.buzzed
-                                    )
-                                }
-                            )
-                            send(json.encodeToString(BuzzerData.serializer(), apiModel))
-                        }
+                        .map { it.toBuzzerData() }
+                        .onEach { buzzerData -> send(json.encodeToString(BuzzerData.serializer(), buzzerData)) }
                         .flowOn(Dispatchers.IO)
                         .launchIn(this)
 

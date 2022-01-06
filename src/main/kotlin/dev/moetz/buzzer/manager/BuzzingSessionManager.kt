@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.OffsetDateTime
 import java.util.*
 
 class BuzzingSessionManager(
@@ -18,7 +19,8 @@ class BuzzingSessionManager(
         data class ParticipantState(
             val index: Int,
             val name: String,
-            val buzzed: Boolean
+            val buzzed: Boolean,
+            val buzzedAt: OffsetDateTime?
         )
     }
 
@@ -75,7 +77,12 @@ class BuzzingSessionManager(
                                 val indexToInsertAt = list.lastIndex + 1
                                 list.add(
                                     indexToInsertAt,
-                                    BuzzingSessionData.ParticipantState(indexToInsertAt, nickname, false)
+                                    BuzzingSessionData.ParticipantState(
+                                        index = indexToInsertAt,
+                                        name = nickname,
+                                        buzzed = false,
+                                        buzzedAt = null
+                                    )
                                 )
                                 list
                             }
@@ -121,6 +128,7 @@ class BuzzingSessionManager(
             if (alreadyBuzzed) {
                 //Nothing to do here
             } else {
+                val dateTime = OffsetDateTime.now()
                 buzzLogging.log(lobby = id, role = BuzzLogging.Role.Participant, "$participantName buzzed")
                 flow.value = flow.value.let { currentState ->
                     currentState.copy(
@@ -134,7 +142,8 @@ class BuzzingSessionManager(
                                             if (participantState.name == participantName) {
                                                 participantState.copy(
                                                     buzzed = true,
-                                                    index = indexOfLastBuzzed + 1
+                                                    index = indexOfLastBuzzed + 1,
+                                                    buzzedAt = dateTime
                                                 )
                                             } else {
                                                 if (index > indexOfLastBuzzed) {
@@ -157,7 +166,12 @@ class BuzzingSessionManager(
                                         }
                                     list.add(
                                         indexToInsertAt,
-                                        BuzzingSessionData.ParticipantState(indexToInsertAt, participantName, true)
+                                        BuzzingSessionData.ParticipantState(
+                                            index = indexToInsertAt,
+                                            name = participantName,
+                                            buzzed = true,
+                                            buzzedAt = dateTime
+                                        )
                                     )
                                     list
                                         .mapIndexed { index, participantState ->

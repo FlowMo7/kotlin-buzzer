@@ -1,15 +1,3 @@
-function getXnd(place) {
-    if (place === 1) {
-        return '1st'
-    } else if (place === 2) {
-        return '2nd';
-    } else if (place === 3) {
-        return '3rd';
-    } else {
-        return place + 'th';
-    }
-}
-
 function buildParticipantsList(participants) {
     if (participants.length === 0) {
         return '<i>No participants yet</i>';
@@ -31,11 +19,21 @@ function buildBuzzesList(participants) {
     } else {
         var text = ''
         participants.filter(it => it.buzzed === true).forEach(function (item, index) {
+            let date = convertDateToLocalTimezone(item.buzzedAt);
+            let timeString = withLeadingZero(date.getHours()) + ':' + withLeadingZero(date.getMinutes()) + ':' + withLeadingZero(date.getSeconds()) + '.' + withLeadingZero(date.getMilliseconds(), true);
+
+            let entryCSSClass;
             if (index === 0) {
-                text += '<div class="host-buzz-entry host-buzz-entry-first">' + item.name + '<span class="host-buzz-place">' + getXnd(index + 1) + '</span></div><br />\n';
+                entryCSSClass = 'host-buzz-entry-first';
             } else {
-                text += '<div class="host-buzz-entry host-buzz-entry-not-first">' + item.name + '<span class="host-buzz-place">' + getXnd(index + 1) + '</span></div><br />\n';
+                entryCSSClass = 'host-buzz-entry-not-first';
             }
+
+            text += '<div class="host-buzz-entry ' + entryCSSClass + '">' +
+                '<div class="host-buzz-place">' + getXnd(index + 1) + '</div>' +
+                '<div>' + item.name + '</div>' +
+                '<div class="host-buzz-time" title="Buzzed at">' + timeString + '</div>' +
+                '</div>';
         })
         return text;
     }
@@ -105,3 +103,29 @@ function getParameterByName(name, url = window.location.href) {
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
+function getXnd(place) {
+    if (place === 1) {
+        return '1st'
+    } else if (place === 2) {
+        return '2nd';
+    } else if (place === 3) {
+        return '3rd';
+    } else {
+        return place + 'th';
+    }
+}
+
+function convertDateToLocalTimezone(date) {
+    let parsedAndConverted = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString());
+    parsedAndConverted.setMilliseconds(getMilliseconds(date));
+    return parsedAndConverted;
+}
+
+function withLeadingZero(number, threeDigits = false) {
+    return ((threeDigits && number < 100) ? '0' : '') + (number < 10 ? '0' : '') + number;
+}
+
+function getMilliseconds(date) {
+    let split = date.split('.');
+    return Math.round(parseInt(split[1]) / 1000);
+}
