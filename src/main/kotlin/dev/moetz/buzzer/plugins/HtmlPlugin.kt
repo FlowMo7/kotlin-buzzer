@@ -185,6 +185,7 @@ fun Application.configure(
                                     onClick = "sendBuzz();"
 
                                     img(alt = "Buzz", src = "/icon/buzzer.svg") {
+                                        id = "buzzer_button_image"
                                         this.width = "150px"
                                     }
                                 }

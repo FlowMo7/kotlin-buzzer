@@ -69,9 +69,11 @@ function participant(pathPrefix, lobbyCode) {
                     if (participantState.buzzed === true) {
                         document.getElementById('buzzer_button').classList.add('buzzer-buzzed');
                         document.getElementById('buzzer_button').classList.remove('buzzer-ready');
+                        document.getElementById('buzzer_button_image').src = '/icon/buzzer_buzzed.png';
                     } else {
                         document.getElementById('buzzer_button').classList.add('buzzer-ready');
                         document.getElementById('buzzer_button').classList.remove('buzzer-buzzed');
+                        document.getElementById('buzzer_button_image').src = '/icon/buzzer.svg';
                     }
                 }
             })

@@ -32,6 +32,7 @@ fun Application.configureStatic() {
             resource(remotePath = "favicon-32x32.png", resource = "icon/favicon-32x32.png")
 
             resource(remotePath = "buzzer.svg", resource = "icon/buzzer.svg")
+            resource(remotePath = "buzzer_buzzed.png", resource = "icon/buzzer_buzzed.png")
         }
 
     }
