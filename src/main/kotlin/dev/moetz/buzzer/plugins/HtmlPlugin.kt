@@ -183,7 +183,10 @@ fun Application.configure(
                                 button(classes = "buzzer") {
                                     id = "buzzer_button"
                                     onClick = "sendBuzz();"
-                                    +"Buzz"
+
+                                    img(alt = "Buzz", src = "/icon/buzzer.svg") {
+                                        this.width = "150px"
+                                    }
                                 }
                             }
                         }
