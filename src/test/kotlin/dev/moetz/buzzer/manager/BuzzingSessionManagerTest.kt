@@ -48,7 +48,7 @@ class BuzzingSessionManagerTest {
             buzzData.participantsState.first().buzzed shouldBeEqualTo true
             buzzData.participantsState.first().buzzedAt.shouldNotBeNull()
             buzzData.participantsState.first().buzzedAt!!.shouldBeInRange(
-                OffsetDateTime.now().minusSeconds(1),
+                OffsetDateTime.now().minusSeconds(3),
                 OffsetDateTime.now()
             )
         }
@@ -77,7 +77,7 @@ class BuzzingSessionManagerTest {
                 participantsState.first().buzzed shouldBeEqualTo true
                 participantsState.first().buzzedAt.shouldNotBeNull()
                 participantsState.first().buzzedAt!!.shouldBeInRange(
-                    OffsetDateTime.now().minusSeconds(1),
+                    OffsetDateTime.now().minusSeconds(3),
                     OffsetDateTime.now()
                 )
             }
@@ -109,7 +109,7 @@ class BuzzingSessionManagerTest {
                 participantsState.first().buzzed shouldBeEqualTo true
                 participantsState.first().buzzedAt.shouldNotBeNull()
                 participantsState.first().buzzedAt!!.shouldBeInRange(
-                    OffsetDateTime.now().minusSeconds(1),
+                    OffsetDateTime.now().minusSeconds(3),
                     OffsetDateTime.now()
                 )
             }
