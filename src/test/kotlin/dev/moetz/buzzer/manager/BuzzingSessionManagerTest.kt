@@ -4,12 +4,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.amshove.kluent.shouldBeEqualTo
-import org.amshove.kluent.shouldBeFalse
-import org.amshove.kluent.shouldBeTrue
+import org.amshove.kluent.*
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.time.OffsetDateTime
 
 class BuzzingSessionManagerTest {
 
@@ -26,97 +25,95 @@ class BuzzingSessionManagerTest {
     }
 
     @Test
-    fun test1() = runBlocking {
-        assertEquals(
-            BuzzingSessionManager.BuzzingSessionData(
-                id = "lobby1",
-                participantsState = emptyList()
-            ),
-            buzzingSessionManager.getBuzzerFlow("lobby1").first()
-        )
+    fun test1() {
+        runBlocking {
+            assertEquals(
+                BuzzingSessionManager.BuzzingSessionData(
+                    id = "lobby1",
+                    participantsState = emptyList()
+                ),
+                buzzingSessionManager.getBuzzerFlow("lobby1").first()
+            )
 
-        buzzingSessionManager.addBuzz("lobby1", "Participant1")
+            buzzingSessionManager.addBuzz("lobby1", "Participant1")
 
-        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
+            verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
 
-        assertEquals(
-            BuzzingSessionManager.BuzzingSessionData(
-                id = "lobby1",
-                participantsState = listOf(
-                    BuzzingSessionManager.BuzzingSessionData.ParticipantState(
-                        index = 0,
-                        name = "Participant1",
-                        buzzed = true
-                    )
-                )
-            ),
-            buzzingSessionManager.getBuzzerFlow("lobby1").first()
-        )
+
+            val buzzData = buzzingSessionManager.getBuzzerFlow("lobby1").first()
+            buzzData.id shouldBeEqualTo "lobby1"
+            buzzData.participantsState.count() shouldBeEqualTo 1
+            buzzData.participantsState.first().index shouldBeEqualTo 0
+            buzzData.participantsState.first().name shouldBeEqualTo "Participant1"
+            buzzData.participantsState.first().buzzed shouldBeEqualTo true
+            buzzData.participantsState.first().buzzedAt.shouldNotBeNull()
+            buzzData.participantsState.first().buzzedAt!!.shouldBeInRange(
+                OffsetDateTime.now().minusSeconds(1),
+                OffsetDateTime.now()
+            )
+        }
     }
 
     @Test
-    fun test2() = runBlocking {
-        assertEquals(
-            BuzzingSessionManager.BuzzingSessionData(
-                id = "lobby1",
-                participantsState = emptyList()
-            ),
-            buzzingSessionManager.getBuzzerFlow("lobby1").first()
-        )
+    fun test2() {
+        runBlocking {
+            assertEquals(
+                BuzzingSessionManager.BuzzingSessionData(
+                    id = "lobby1",
+                    participantsState = emptyList()
+                ),
+                buzzingSessionManager.getBuzzerFlow("lobby1").first()
+            )
 
-        buzzingSessionManager.addBuzz("lobby1", "Participant1")
+            buzzingSessionManager.addBuzz("lobby1", "Participant1")
 
-        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
+            verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
 
-        assertEquals(
-            BuzzingSessionManager.BuzzingSessionData(
-                id = "lobby1",
-                participantsState = listOf(
-                    BuzzingSessionManager.BuzzingSessionData.ParticipantState(
-                        index = 0,
-                        name = "Participant1",
-                        buzzed = true
-                    )
+            buzzingSessionManager.getBuzzerFlow("lobby1").first().apply {
+                id shouldBeEqualTo "lobby1"
+                participantsState.count() shouldBeEqualTo 1
+                participantsState.first().index shouldBeEqualTo 0
+                participantsState.first().name shouldBeEqualTo "Participant1"
+                participantsState.first().buzzed shouldBeEqualTo true
+                participantsState.first().buzzedAt.shouldNotBeNull()
+                participantsState.first().buzzedAt!!.shouldBeInRange(
+                    OffsetDateTime.now().minusSeconds(1),
+                    OffsetDateTime.now()
                 )
-            ),
-            buzzingSessionManager.getBuzzerFlow("lobby1").first()
-        )
+            }
 
-        buzzingSessionManager.clearBuzzes("lobby1")
 
-        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Host, "buzzes cleared") }
+            buzzingSessionManager.clearBuzzes("lobby1")
 
-        assertEquals(
-            BuzzingSessionManager.BuzzingSessionData(
-                id = "lobby1",
-                participantsState = listOf(
-                    BuzzingSessionManager.BuzzingSessionData.ParticipantState(
-                        index = 0,
-                        name = "Participant1",
-                        buzzed = false
-                    )
+            verify { buzzLogging.log("lobby1", BuzzLogging.Role.Host, "buzzes cleared") }
+
+            buzzingSessionManager.getBuzzerFlow("lobby1").first().apply {
+                id shouldBeEqualTo "lobby1"
+                participantsState.count() shouldBeEqualTo 1
+                participantsState.first().index shouldBeEqualTo 0
+                participantsState.first().name shouldBeEqualTo "Participant1"
+                participantsState.first().buzzed shouldBeEqualTo false
+                participantsState.first().buzzedAt.shouldBeNull()
+            }
+
+
+            buzzingSessionManager.addBuzz("lobby1", "Participant1")
+
+            verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
+
+            buzzingSessionManager.getBuzzerFlow("lobby1").first().apply {
+                id shouldBeEqualTo "lobby1"
+                participantsState.count() shouldBeEqualTo 1
+                participantsState.first().index shouldBeEqualTo 0
+                participantsState.first().name shouldBeEqualTo "Participant1"
+                participantsState.first().buzzed shouldBeEqualTo true
+                participantsState.first().buzzedAt.shouldNotBeNull()
+                participantsState.first().buzzedAt!!.shouldBeInRange(
+                    OffsetDateTime.now().minusSeconds(1),
+                    OffsetDateTime.now()
                 )
-            ),
-            buzzingSessionManager.getBuzzerFlow("lobby1").first()
-        )
-
-        buzzingSessionManager.addBuzz("lobby1", "Participant1")
-
-        verify { buzzLogging.log("lobby1", BuzzLogging.Role.Participant, "Participant1 buzzed") }
-
-        assertEquals(
-            BuzzingSessionManager.BuzzingSessionData(
-                id = "lobby1",
-                participantsState = listOf(
-                    BuzzingSessionManager.BuzzingSessionData.ParticipantState(
-                        index = 0,
-                        name = "Participant1",
-                        buzzed = true
-                    )
-                )
-            ),
-            buzzingSessionManager.getBuzzerFlow("lobby1").first()
-        )
+            }
+        }
     }
 
     @Test

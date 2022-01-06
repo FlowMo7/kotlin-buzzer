@@ -198,7 +198,12 @@ class BuzzingSessionManager(
                 currentState.copy(
                     participantsState = currentState.participantsState
                         .toMutableList()
-                        .map { it.copy(buzzed = false) }
+                        .map { participantState ->
+                            participantState.copy(
+                                buzzed = false,
+                                buzzedAt = null
+                            )
+                        }
                 )
             }
         }
