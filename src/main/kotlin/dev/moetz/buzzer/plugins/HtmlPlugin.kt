@@ -49,7 +49,7 @@ fun Application.configure(
 
                 footerContent {
                     div(classes = "right-aligned") {
-                        a(href = "/info") {+"Information"}
+                        a(href = "/info") { +"Information" }
                     }
                 }
             }
@@ -74,18 +74,6 @@ fun Application.configure(
                     }
                 }
             }
-        }
-
-        get("robots.txt") {
-            call.respondText(ContentType.Text.Plain) {
-                "User-agent: * Allow: /"
-            }
-        }
-
-        get("status") {
-            // any problems would arise at startup anyways, so once the webserver is alive, we are good to go to say
-            // we are healthy
-            call.respond(HttpStatusCode.NoContent)
         }
 
         post("create") {

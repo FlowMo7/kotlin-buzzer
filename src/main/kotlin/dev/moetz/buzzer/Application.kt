@@ -3,6 +3,7 @@ package dev.moetz.buzzer
 import dev.moetz.buzzer.manager.BuzzLogging
 import dev.moetz.buzzer.manager.BuzzingSessionManager
 import dev.moetz.buzzer.plugins.configure
+import dev.moetz.buzzer.plugins.configureMeta
 import dev.moetz.buzzer.plugins.configureStatic
 import dev.moetz.buzzer.plugins.configureWebSocket
 import io.ktor.application.*
@@ -15,7 +16,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
-import java.io.File
 import java.time.Duration
 
 fun main() {
@@ -79,6 +79,9 @@ fun main() {
             formButtonColor = formButtonColor,
             buzzerButtonColorReady = buzzerButtonColorReady,
             buzzerButtonColorBuzzed = buzzerButtonColorBuzzed
+        )
+        configureMeta(
+            formButtonColor = formButtonColor,
         )
         configureStatic()
         configureWebSocket(
