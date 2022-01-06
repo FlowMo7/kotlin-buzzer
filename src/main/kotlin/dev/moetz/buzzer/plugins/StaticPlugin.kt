@@ -8,11 +8,14 @@ import io.ktor.routing.*
 fun Application.configureStatic() {
     routing {
 
-        route("static") {
+        route("js") {
             resource(remotePath = "websocket.js", resource = "websocket.js")
             resource(remotePath = "script.js", resource = "script.js")
             resource(remotePath = "reconnecting-websocket.js", resource = "reconnecting-websocket.js")
             resource(remotePath = "reconnecting-websocket.min.js", resource = "reconnecting-websocket.min.js")
+        }
+
+        route("style") {
             resource(remotePath = "styles.css", resource = "styles.css")
 
             route("font") {

@@ -21,13 +21,13 @@ class SiteTemplate(
         head {
             meta(charset = "utf-8")
             title { +siteTitle }
-            script(type = "text/javascript", src = "/static/reconnecting-websocket.min.js") {
+            script(type = "text/javascript", src = "/js/reconnecting-websocket.min.js") {
 
             }
-            script(type = "text/javascript", src = "/static/websocket.js") {
+            script(type = "text/javascript", src = "/js/websocket.js") {
 
             }
-            script(type = "text/javascript", src = "/static/script.js") {
+            script(type = "text/javascript", src = "/js/script.js") {
 
             }
 
@@ -41,7 +41,7 @@ class SiteTemplate(
                 }
             }
 
-            link(href = "/static/styles.css", rel = "stylesheet", type = "text/css")
+            link(href = "/style/styles.css", rel = "stylesheet", type = "text/css")
 
             meta(name = "robots", content = "index, follow")
             meta(name = "og:title", content = siteTitle)
