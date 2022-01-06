@@ -52,7 +52,7 @@ class SiteTemplate(
             link(href = "/icon/apple-touch-icon.png", rel = "apple-touch-icon") { sizes = "180x180" }
             link(href = "/icon/favicon-32x32.png", type = "image/png", rel = "icon") { sizes = "32x32" }
             link(href = "/icon/favicon-16x16.png", type = "image/png", rel = "icon") { sizes = "16x16" }
-            link(href = "site.webmanifest", rel = "manifest")
+            link(href = "/site.webmanifest", rel = "manifest")
 
             insert(additionalHeadStuff)
         }
