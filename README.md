@@ -22,11 +22,6 @@ Possible environment variables:
 * `COLOR_BUZZER_BUTTON_READY`: The color of the buzzer button. Defaults to `limegreen`.
 * `COLOR_BUZZER_BUTTON_BUZZED`: The color of the buzzer button when already buzzed. Defaults to `cornflowerblue`.
 
-### Data persistence
-
-The server stores no state (or better: lobby-state is only stored in-memory), the only persistence that can be mapped out of the container is a log-file that contains all (buzzing / lobby related) events in a textfile:
-* `/etc/log/kotlin-buzzer/log.txt`
-
 ### Example docker-compose.yml
 
 ```yaml
@@ -38,8 +33,6 @@ services:
       - 8080:8080 #Should be behind an SSL reverse proxy
     environment:
       - DOMAIN=buzzer.example.org
-    volumes:
-      - /srv/docker/buzzer/logs:/etc/log/kotlin-buzzer:rw
 ```
 
 ## Acknowledgments

@@ -29,12 +29,9 @@ fun main() {
     val buzzerButtonColorBuzzed =
         System.getenv("COLOR_BUZZER_BUTTON_BUZZED")?.takeIf { it.isNotBlank() } ?: "cornflowerblue"
 
-    val logFilePath = "/etc/log/kotlin-buzzer"
-
 
     val buzzLogging = BuzzLogging(
-        logFile = File(logFilePath, "log.txt"),
-        alsoLogToStdout = debugLogsEnabled
+        enabled = debugLogsEnabled
     )
 
     val buzzingSessionManager = BuzzingSessionManager(
