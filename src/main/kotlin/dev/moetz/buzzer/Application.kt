@@ -56,7 +56,7 @@ fun main() {
                     ContentType.Image.PNG -> {
                         CachingOptions(
                             CacheControl.MaxAge(
-                                maxAgeSeconds = 24 * 60 * 60,    //24 hours
+                                maxAgeSeconds = 15 * 60,    //15 minutes
                                 visibility = CacheControl.Visibility.Public
                             )
                         )
