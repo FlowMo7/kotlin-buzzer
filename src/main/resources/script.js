@@ -58,6 +58,23 @@ function host(pathPrefix, lobbyCode) {
     );
 }
 
+function monitor(pathPrefix, lobbyCode) {
+    connectToWebsocket(
+        pathPrefix + '/ws/host/' + lobbyCode,
+        function (data) {
+            let payload = JSON.parse(data);
+            document.getElementById('buzzes_list').innerHTML = buildBuzzesList(payload.participants);
+        },
+        function (isConnected) {
+            if (isConnected) {
+                document.getElementById('connection_status').innerHTML = '';
+            } else {
+                document.getElementById('connection_status').innerHTML = 'Not connected. You will not get updates on buzzes. Please try refreshing this page.';
+            }
+        }
+    );
+}
+
 function participant(pathPrefix, lobbyCode) {
     let nickname = getParameterByName('nickname');
     connectToWebsocket(

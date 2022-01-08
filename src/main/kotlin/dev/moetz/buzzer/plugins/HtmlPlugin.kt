@@ -197,7 +197,7 @@ fun Application.configure(
         }
 
         get("host/{lobbyCode}") {
-            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyId not set in path" }
+            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyCode not set in path" }
 
             if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
@@ -270,6 +270,45 @@ fun Application.configure(
                                 +"):"
                                 div {
                                     id = "participant_list"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        get("monitor/{lobbyCode}") {
+            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyCode not set in path" }
+
+            if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
+            } else {
+                call.respondHtmlTemplate(
+                    SiteTemplate(
+                        siteTitle = "Buzzer Monitor",
+                        formButtonColor = formButtonColor,
+                        buzzerButtonColorReady = buzzerButtonColorReady,
+                        buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                    )
+                ) {
+                    additionalHeadStuff {
+                        script(type = "text/javascript") {
+                            unsafe { +"window.onload = function() { monitor('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }
+                        }
+                    }
+
+                    content {
+                        div(classes = "centered centered-text") {
+
+                            span {
+                                id = "connection_status"
+                                style = "color: red;"
+                            }
+
+                            div(classes = "participant-box") {
+                                div {
+                                    id = "buzzes_list"
                                 }
                             }
                         }
