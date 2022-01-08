@@ -14,13 +14,17 @@ class BuzzingSessionManagerTest {
 
     private lateinit var buzzingSessionManager: BuzzingSessionManager
     private lateinit var buzzLogging: BuzzLogging
+    private lateinit var connectionCountManager: ConnectionCountManager
 
     @Before
     fun setUp() {
         buzzLogging = mockk(relaxed = true)
+        connectionCountManager = mockk(relaxed = true)
 
         buzzingSessionManager = BuzzingSessionManager(
-            buzzLogging = buzzLogging
+            buzzLogging = buzzLogging,
+            connectionCountManager =connectionCountManager,
+            lobbyCodeLength = 6
         )
     }
 
@@ -30,6 +34,7 @@ class BuzzingSessionManagerTest {
             assertEquals(
                 BuzzingSessionManager.BuzzingSessionData(
                     id = "lobby1",
+                    hostSecret = null,
                     participantsState = emptyList()
                 ),
                 buzzingSessionManager.getBuzzerFlow("lobby1").first()
@@ -42,6 +47,7 @@ class BuzzingSessionManagerTest {
 
             val buzzData = buzzingSessionManager.getBuzzerFlow("lobby1").first()
             buzzData.id shouldBeEqualTo "lobby1"
+            buzzData.hostSecret.shouldBeNull()
             buzzData.participantsState.count() shouldBeEqualTo 1
             buzzData.participantsState.first().index shouldBeEqualTo 0
             buzzData.participantsState.first().name shouldBeEqualTo "Participant1"
@@ -60,6 +66,7 @@ class BuzzingSessionManagerTest {
             assertEquals(
                 BuzzingSessionManager.BuzzingSessionData(
                     id = "lobby1",
+                    hostSecret = null,
                     participantsState = emptyList()
                 ),
                 buzzingSessionManager.getBuzzerFlow("lobby1").first()
@@ -71,6 +78,7 @@ class BuzzingSessionManagerTest {
 
             buzzingSessionManager.getBuzzerFlow("lobby1").first().apply {
                 id shouldBeEqualTo "lobby1"
+                hostSecret.shouldBeNull()
                 participantsState.count() shouldBeEqualTo 1
                 participantsState.first().index shouldBeEqualTo 0
                 participantsState.first().name shouldBeEqualTo "Participant1"
@@ -89,6 +97,7 @@ class BuzzingSessionManagerTest {
 
             buzzingSessionManager.getBuzzerFlow("lobby1").first().apply {
                 id shouldBeEqualTo "lobby1"
+                hostSecret.shouldBeNull()
                 participantsState.count() shouldBeEqualTo 1
                 participantsState.first().index shouldBeEqualTo 0
                 participantsState.first().name shouldBeEqualTo "Participant1"
@@ -103,6 +112,7 @@ class BuzzingSessionManagerTest {
 
             buzzingSessionManager.getBuzzerFlow("lobby1").first().apply {
                 id shouldBeEqualTo "lobby1"
+                hostSecret.shouldBeNull()
                 participantsState.count() shouldBeEqualTo 1
                 participantsState.first().index shouldBeEqualTo 0
                 participantsState.first().name shouldBeEqualTo "Participant1"

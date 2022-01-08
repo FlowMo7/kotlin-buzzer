@@ -9,7 +9,8 @@ import java.util.*
 
 class BuzzingSessionManager(
     private val buzzLogging: BuzzLogging,
-    connectionCountManager: ConnectionCountManager
+    connectionCountManager: ConnectionCountManager,
+    private val lobbyCodeLength: Int
 ) {
 
     data class BuzzingSessionData(
@@ -42,6 +43,15 @@ class BuzzingSessionManager(
     private val flowMutationMutex = Mutex()
 
 
+    private fun generateRandomString(length: Int): String {
+        var random = ""
+        do {
+            random += UUID.randomUUID().toString().replace("-", "").lowercase(Locale.getDefault())
+        } while (random.length < length)
+
+        return random.substring(0, length)
+    }
+
     private suspend fun getOrAddBuzzingSessionStateFlow(id: String): MutableStateFlow<BuzzingSessionData> {
         return buzzingStateAccessMutex.withLock {
             val data = buzzingSateMap[id]
@@ -64,10 +74,10 @@ class BuzzingSessionManager(
         return buzzingStateAccessMutex.withLock {
             var id: String
             do {
-                id = UUID.randomUUID().toString().substringBefore("-").lowercase(Locale.getDefault())
+                id = generateRandomString(lobbyCodeLength)
             } while (buzzingSateMap.containsKey(id))
 
-            val hostPassword = UUID.randomUUID().toString().substringBefore("-").lowercase(Locale.getDefault())
+            val hostPassword = generateRandomString(6)
 
             MutableStateFlow(
                 BuzzingSessionData(

@@ -21,6 +21,7 @@ Possible environment variables:
 * `COLOR_FORM_BUTTON`: The color of the buttons before joining a lobby (on the index page). Defaults to `#161D99`.
 * `COLOR_BUZZER_BUTTON_READY`: The color of the buzzer button. Defaults to `limegreen`.
 * `COLOR_BUZZER_BUTTON_BUZZED`: The color of the buzzer button when already buzzed. Defaults to `cornflowerblue`.
+* `DEFAULT_LOBBY_CODE_LENGTH`: The length of the generated ([0-9a-f], lower-cased) lobby codes. Defaults to `6`.
 
 ### Example docker-compose.yml
 
