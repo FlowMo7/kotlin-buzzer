@@ -60,7 +60,7 @@ function host(pathPrefix, lobbyCode) {
 
 function monitor(pathPrefix, lobbyCode) {
     connectToWebsocket(
-        pathPrefix + '/ws/host/' + lobbyCode,
+        pathPrefix + '/ws/monitor/' + lobbyCode,
         function (data) {
             let payload = JSON.parse(data);
             document.getElementById('buzzes_list').innerHTML = buildBuzzesList(payload.participants);

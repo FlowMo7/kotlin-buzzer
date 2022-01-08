@@ -122,6 +122,29 @@ fun Application.configureWebSocket(
                 }
             }
 
+            webSocket("monitor/{lobbyCode}") {
+                val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "path parameter {lobbyCode} not set" }
+
+                if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "lobbyCode contains invalid characters"))
+                } else {
+                    buzzingSessionManager.getBuzzerFlow(id = lobbyCode)
+                        .map { it.toBuzzerData() }
+                        .onEach { buzzerData -> send(json.encodeToString(BuzzerData.serializer(), buzzerData)) }
+                        .flowOn(Dispatchers.IO)
+                        .launchIn(this)
+
+                    for (frame in incoming) {
+                        when (frame) {
+                            is Frame.Text -> {
+                                val receivedText = frame.readText()
+                                //we are not receiving commands on monitoring page, but keep the loop here for suspending reasons
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
     }
