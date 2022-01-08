@@ -1,19 +1,20 @@
 package dev.moetz.buzzer.manager
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.OffsetDateTime
 import java.util.*
 
 class BuzzingSessionManager(
-    private val buzzLogging: BuzzLogging
+    private val buzzLogging: BuzzLogging,
+    connectionCountManager: ConnectionCountManager
 ) {
 
     data class BuzzingSessionData(
         val id: String,
+        val hostSecret: String?,
         val participantsState: List<ParticipantState>
     ) {
         data class ParticipantState(
@@ -22,6 +23,16 @@ class BuzzingSessionManager(
             val buzzed: Boolean,
             val buzzedAt: OffsetDateTime?
         )
+    }
+
+    init {
+        connectionCountManager.cleanUpLobbyFlow
+            .onEach { lobbyCodeToClean ->
+                flowMutationMutex.withLock {
+                    buzzingSateMap.remove(lobbyCodeToClean)
+                }
+            }
+            .launchIn(GlobalScope)
     }
 
     private val buzzingSateMap: MutableMap<String, MutableStateFlow<BuzzingSessionData>> = mutableMapOf()
@@ -35,7 +46,13 @@ class BuzzingSessionManager(
         return buzzingStateAccessMutex.withLock {
             val data = buzzingSateMap[id]
             if (data == null) {
-                MutableStateFlow(BuzzingSessionData(id = id, participantsState = emptyList()))
+                MutableStateFlow(
+                    BuzzingSessionData(
+                        id = id,
+                        hostSecret = null,
+                        participantsState = emptyList()
+                    )
+                )
                     .also { buzzingSateMap[id] = it }
             } else {
                 data
@@ -43,17 +60,25 @@ class BuzzingSessionManager(
         }
     }
 
-    private suspend fun getNewLobbyCode(): String {
+    private suspend fun getNewLobbyCode(): Pair<String, String> {
         return buzzingStateAccessMutex.withLock {
             var id: String
             do {
                 id = UUID.randomUUID().toString().substringBefore("-").lowercase(Locale.getDefault())
             } while (buzzingSateMap.containsKey(id))
 
-            MutableStateFlow(BuzzingSessionData(id = id, participantsState = emptyList()))
+            val hostPassword = UUID.randomUUID().toString().substringBefore("-").lowercase(Locale.getDefault())
+
+            MutableStateFlow(
+                BuzzingSessionData(
+                    id = id,
+                    hostSecret = hostPassword,
+                    participantsState = emptyList()
+                )
+            )
                 .also { buzzingSateMap[id] = it }
 
-            id
+            id to hostPassword
         }
     }
 
@@ -105,19 +130,19 @@ class BuzzingSessionManager(
         }
     }
 
-    suspend fun onHostEntered(id: String) {
+    fun onHostEntered(id: String) {
         buzzLogging.log(lobby = id, role = BuzzLogging.Role.Host, "joined")
         //TODO
     }
 
-    suspend fun onHostLeft(id: String) {
+    fun onHostLeft(id: String) {
         buzzLogging.log(lobby = id, role = BuzzLogging.Role.Host, "left")
         //TODO
     }
 
-    suspend fun createNewLobby(): String {
-        return getNewLobbyCode().also { lobbyId ->
-            buzzLogging.log(lobby = lobbyId, role = BuzzLogging.Role.Host, "created")
+    suspend fun createNewLobby(): Pair<String, String> {
+        return getNewLobbyCode().also { (lobbyCode, _) ->
+            buzzLogging.log(lobby = lobbyCode, role = BuzzLogging.Role.Host, "created")
         }
     }
 
@@ -209,12 +234,28 @@ class BuzzingSessionManager(
         }
     }
 
-    suspend fun isValidLobbyCode(code: String): Boolean {
+    suspend fun verifyHostSecret(id: String, secret: String, applyIfNoSecretSetYet: Boolean = false): Boolean {
+        return flowMutationMutex.withLock {
+            val flow = getOrAddBuzzingSessionStateFlow(id)
+            val currentSecret = flow.value.hostSecret
+            if (currentSecret.isNullOrBlank()) {
+                //No secret set on lobby -> auth succeeds
+                if (applyIfNoSecretSetYet) {
+                    flow.value = flow.value.copy(hostSecret = secret)
+                }
+                true
+            } else {
+                currentSecret == secret
+            }
+        }
+    }
+
+    fun isValidLobbyCode(code: String): Boolean {
         val regex = "^[a-zA-Z0-9-_]*\$".toRegex()
         return regex.matches(code)
     }
 
-    suspend fun isValidNickname(nickname: String): Boolean {
+    fun isValidNickname(nickname: String): Boolean {
         val regex = "^[a-zA-Z0-9-_ ]*\$".toRegex()
         return regex.matches(nickname)
     }

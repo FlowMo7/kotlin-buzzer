@@ -77,8 +77,8 @@ fun Application.configure(
         }
 
         post("create") {
-            val lobbyCode = buzzingSessionManager.createNewLobby()
-            call.respondRedirect(url = "/host/$lobbyCode", permanent = false)
+            val (lobbyCode, hostSecret) = buzzingSessionManager.createNewLobby()
+            call.respondRedirect(url = "/host/$lobbyCode?secret=$hostSecret", permanent = false)
         }
 
         route("join") {
@@ -198,10 +198,28 @@ fun Application.configure(
 
         get("host/{lobbyCode}") {
             val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyCode not set in path" }
+            val hostSecret = call.request.queryParameters["secret"].orEmpty()
 
             if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
+            } else if (buzzingSessionManager.verifyHostSecret(
+                    id = lobbyCode,
+                    secret = hostSecret,
+                    applyIfNoSecretSetYet = true
+                ).not()
+            ) {
+                call.respond(HttpStatusCode.Unauthorized, "Invalid secret")
             } else {
+                val lobbyJoinUrl = buildString {
+                    if (isSecure) {
+                        append("https://")
+                    } else {
+                        append("http://")
+                    }
+                    append(publicHostname)
+                    append("/join/$lobbyCode")
+                }
+
                 call.respondHtmlTemplate(
                     SiteTemplate(
                         siteTitle = "Buzzer Host",
@@ -228,17 +246,8 @@ fun Application.configure(
                             }
 
                             div {
-                                +"Link to join this lobby:"
+                                +"Link to share to join this lobby:"
                                 br()
-                                val lobbyJoinUrl = buildString {
-                                    if (isSecure) {
-                                        append("https://")
-                                    } else {
-                                        append("http://")
-                                    }
-                                    append(publicHostname)
-                                    append("/join/$lobbyCode")
-                                }
                                 a(href = lobbyJoinUrl, target = "_blank") { +lobbyJoinUrl }
                             }
 

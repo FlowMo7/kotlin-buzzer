@@ -1,6 +1,7 @@
 package dev.moetz.buzzer.plugins
 
 import dev.moetz.buzzer.manager.BuzzingSessionManager
+import dev.moetz.buzzer.manager.ConnectionCountManager
 import dev.moetz.buzzer.model.BuzzerData
 import dev.moetz.buzzer.model.IncomingMessage
 import io.ktor.application.*
@@ -31,9 +32,10 @@ private fun BuzzingSessionManager.BuzzingSessionData.toBuzzerData(): BuzzerData 
 fun Application.configureWebSocket(
     json: Json,
     buzzingSessionManager: BuzzingSessionManager,
-    debugEnabled: Boolean
+    connectionCountManager: ConnectionCountManager
 ) {
     routing {
+
         route("ws") {
 
             webSocket("feed/{lobbyCode}") {
@@ -46,6 +48,7 @@ fun Application.configureWebSocket(
                 } else if (buzzingSessionManager.isValidNickname(nickname).not()) {
                     close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "nickname contains invalid characters"))
                 } else {
+                    connectionCountManager.onParticipantConnected(lobbyCode = lobbyCode)
                     buzzingSessionManager.onParticipantEntered(id = lobbyCode, nickname = nickname)
 
                     buzzingSessionManager.getBuzzerFlow(id = lobbyCode)
@@ -73,21 +76,21 @@ fun Application.configureWebSocket(
                             }
                         }
                     }
-                    if (debugEnabled) {
-                        println("Session closed for lobby $lobbyCode and nickname $nickname.")
-                        println("Closed reason: ${closeReason.await()}")
-                    }
                     buzzingSessionManager.onParticipantLeft(id = lobbyCode, nickname = nickname)
+                    connectionCountManager.onParticipantConnectionTerminated(lobbyCode = lobbyCode)
                 }
             }
 
             webSocket("host/{lobbyCode}") {
-
                 val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "path parameter {lobbyCode} not set" }
+                val hostSecret = call.request.queryParameters["secret"].orEmpty()
 
                 if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
                     close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "lobbyCode contains invalid characters"))
+                } else if (buzzingSessionManager.verifyHostSecret(id = lobbyCode, secret = hostSecret).not()) {
+                    close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Invalid host secret"))
                 } else {
+                    connectionCountManager.onHostConnected(lobbyCode = lobbyCode)
                     buzzingSessionManager.onHostEntered(id = lobbyCode)
 
                     buzzingSessionManager.getBuzzerFlow(id = lobbyCode)
@@ -114,11 +117,8 @@ fun Application.configureWebSocket(
                             }
                         }
                     }
-                    if (debugEnabled) {
-                        println("Session closed for lobby $lobbyCode as host.")
-                        println("Closed reason: ${closeReason.await()}")
-                    }
                     buzzingSessionManager.onHostLeft(id = lobbyCode)
+                    connectionCountManager.onHostConnectionTerminated(lobbyCode = lobbyCode)
                 }
             }
 

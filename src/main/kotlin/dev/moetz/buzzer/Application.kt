@@ -2,6 +2,7 @@ package dev.moetz.buzzer
 
 import dev.moetz.buzzer.manager.BuzzLogging
 import dev.moetz.buzzer.manager.BuzzingSessionManager
+import dev.moetz.buzzer.manager.ConnectionCountManager
 import dev.moetz.buzzer.plugins.configure
 import dev.moetz.buzzer.plugins.configureMeta
 import dev.moetz.buzzer.plugins.configureStatic
@@ -34,8 +35,11 @@ fun main() {
         enabled = debugLogsEnabled
     )
 
+    val connectionCountManager = ConnectionCountManager()
+
     val buzzingSessionManager = BuzzingSessionManager(
-        buzzLogging = buzzLogging
+        buzzLogging = buzzLogging,
+        connectionCountManager = connectionCountManager
     )
 
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -88,7 +92,7 @@ fun main() {
         configureWebSocket(
             json = Json,
             buzzingSessionManager = buzzingSessionManager,
-            debugEnabled = debugLogsEnabled
+            connectionCountManager = connectionCountManager
         )
     }.start(wait = true)
 }

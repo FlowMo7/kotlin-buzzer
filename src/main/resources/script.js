@@ -41,7 +41,7 @@ function buildBuzzesList(participants) {
 
 function host(pathPrefix, lobbyCode) {
     connectToWebsocket(
-        pathPrefix + '/ws/host/' + lobbyCode,
+        pathPrefix + '/ws/host/' + lobbyCode + '?secret=' + getParameterByName('secret'),
         function (data) {
             let payload = JSON.parse(data);
             document.getElementById('participant_count').innerHTML = payload.participants.length;
