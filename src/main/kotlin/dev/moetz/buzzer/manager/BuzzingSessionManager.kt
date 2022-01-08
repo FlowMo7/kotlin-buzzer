@@ -30,6 +30,7 @@ class BuzzingSessionManager(
         connectionCountManager.cleanUpLobbyFlow
             .onEach { lobbyCodeToClean ->
                 flowMutationMutex.withLock {
+                    buzzLogging.log(lobbyCodeToClean, BuzzLogging.Role.System, "Clearing state")
                     buzzingSateMap.remove(lobbyCodeToClean)
                 }
             }

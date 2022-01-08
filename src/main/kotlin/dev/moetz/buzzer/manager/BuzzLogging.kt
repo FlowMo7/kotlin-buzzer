@@ -18,7 +18,7 @@ class BuzzLogging(
     }
 
     enum class Role {
-        Participant, Host
+        Participant, Host, System
     }
 
     fun log(lobby: String, role: Role, message: String) {
