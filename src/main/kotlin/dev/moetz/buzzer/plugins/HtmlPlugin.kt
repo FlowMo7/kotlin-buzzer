@@ -283,6 +283,12 @@ fun Application.configure(
                             }
                         }
                     }
+
+                    footerContent {
+                        div(classes = "right-aligned") {
+                            a(href = "/monitor/$lobbyCode") { +"Buzzes Overlay Link" }
+                        }
+                    }
                 }
             }
         }
