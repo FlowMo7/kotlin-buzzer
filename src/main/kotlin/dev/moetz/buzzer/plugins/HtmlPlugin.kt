@@ -286,7 +286,7 @@ fun Application.configure(
 
                     footerContent {
                         div(classes = "right-aligned") {
-                            a(href = "/monitor/$lobbyCode") { +"Buzzes Overlay Link" }
+                            a(href = "/monitor/$lobbyCode", target = "_blank") { +"Buzzes Overlay Link" }
                         }
                     }
                 }
