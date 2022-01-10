@@ -4,9 +4,33 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+
+@Serializable
+data class Webmanifest(
+    val name: String,
+    @SerialName("short_name")
+    val shortName: String,
+    val icons: List<Icon>,
+    @SerialName("theme_color")
+    val themeColor: String,
+    @SerialName("background_color")
+    val backgroundColor: String,
+    val display: String
+) {
+    @Serializable
+    data class Icon(
+        val src: String,
+        val sizes: String,
+        val type: String
+    )
+}
 
 fun Application.configureMeta(
     formButtonColor: String,
+    path: String,
 ) {
 
     routing {
@@ -18,9 +42,28 @@ fun Application.configureMeta(
         }
 
         get("site.webmanifest") {
-            call.respondText(contentType = ContentType.parse("application/manifest+json")) {
-                """{"name":"Buzzer","short_name":"Buzzer","icons":[{"src":"/icon/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/icon/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"$formButtonColor","background_color":"#ffffff","display":"standalone"}"""
-            }
+
+            call.respond(
+                Webmanifest(
+                    name = "Buzzer",
+                    shortName = "Buzzer",
+                    icons = listOf(
+                        Webmanifest.Icon(
+                            src = "${path}icon/android-chrome-192x192.png",
+                            sizes = "192x192",
+                            type = "image/png"
+                        ),
+                        Webmanifest.Icon(
+                            src = "${path}icon/android-chrome-512x512.png",
+                            sizes = "512x512",
+                            type = "image/png"
+                        )
+                    ),
+                    themeColor = formButtonColor,
+                    backgroundColor = "#ffffff",
+                    display = "standalone"
+                )
+            )
         }
 
         get("status") {

@@ -16,6 +16,7 @@ import kotlinx.html.*
 fun Application.configure(
     buzzingSessionManager: BuzzingSessionManager,
     publicHostname: String,
+    path: String,
     isSecure: Boolean,
     formButtonColor: String,
     buzzerButtonColorReady: String,
@@ -31,6 +32,7 @@ fun Application.configure(
                     formButtonColor = formButtonColor,
                     buzzerButtonColorReady = buzzerButtonColorReady,
                     buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                    path = path
                 )
             ) {
                 content {
@@ -38,18 +40,18 @@ fun Application.configure(
                         h2 { +"Buzzer" }
                     }
 
-                    insert(CreateLobbyTemplate()) {
+                    insert(CreateLobbyTemplate(path)) {
 
                     }
 
-                    insert(JoinLobbyTemplate(lobbyCode = null)) {
+                    insert(JoinLobbyTemplate(lobbyCode = null, path = path)) {
 
                     }
                 }
 
                 footerContent {
                     div(classes = "right-aligned") {
-                        a(href = "/info") { +"Information" }
+                        a(href = "${path}info") { +"Information" }
                     }
                 }
             }
@@ -62,6 +64,7 @@ fun Application.configure(
                     formButtonColor = formButtonColor,
                     buzzerButtonColorReady = buzzerButtonColorReady,
                     buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                    path = path
                 )
             ) {
                 content {
@@ -78,13 +81,13 @@ fun Application.configure(
 
         post("create") {
             val (lobbyCode, hostSecret) = buzzingSessionManager.createNewLobby()
-            call.respondRedirect(url = "/host/$lobbyCode?secret=$hostSecret", permanent = false)
+            call.respondRedirect(url = "${path}host/$lobbyCode?secret=$hostSecret", permanent = false)
         }
 
         route("join") {
 
             get {
-                call.respondRedirect(url = "/", permanent = false)
+                call.respondRedirect(url = path, permanent = false)
             }
 
             get("{lobbyCode}") {
@@ -101,6 +104,7 @@ fun Application.configure(
                             formButtonColor = formButtonColor,
                             buzzerButtonColorReady = buzzerButtonColorReady,
                             buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                            path = path,
                         )
                     ) {
                         content {
@@ -108,7 +112,7 @@ fun Application.configure(
                                 h2 { +"Join a Buzzing Lobby" }
                             }
 
-                            insert(JoinLobbyTemplate(lobbyCode = lobbyCode)) {
+                            insert(JoinLobbyTemplate(lobbyCode = lobbyCode, path = path)) {
 
                             }
                         }
@@ -128,9 +132,9 @@ fun Application.configure(
                         nickname
                     )
                 ) {
-                    call.respondRedirect(url = "/lobby/$lobbyCode?nickname=$nickname", permanent = false)
+                    call.respondRedirect(url = "${path}lobby/$lobbyCode?nickname=$nickname", permanent = false)
                 } else {
-                    call.respondRedirect(url = "/", permanent = false)
+                    call.respondRedirect(url = path, permanent = false)
                 }
             }
         }
@@ -151,11 +155,12 @@ fun Application.configure(
                         formButtonColor = formButtonColor,
                         buzzerButtonColorReady = buzzerButtonColorReady,
                         buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                        path = path
                     )
                 ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            unsafe { +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }
+                            unsafe { +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}${path}', '$lobbyCode'); };" }
                         }
                     }
 
@@ -184,7 +189,7 @@ fun Application.configure(
                                     id = "buzzer_button"
                                     onClick = "sendBuzz();"
 
-                                    img(alt = "Buzz", src = "/icon/buzzer.svg") {
+                                    img(alt = "Buzz", src = "${path}icon/buzzer.svg") {
                                         id = "buzzer_button_image"
                                         this.width = "150px"
                                     }
@@ -217,7 +222,8 @@ fun Application.configure(
                         append("http://")
                     }
                     append(publicHostname)
-                    append("/join/$lobbyCode")
+                    append(path)
+                    append("join/$lobbyCode")
                 }
 
                 call.respondHtmlTemplate(
@@ -226,11 +232,12 @@ fun Application.configure(
                         formButtonColor = formButtonColor,
                         buzzerButtonColorReady = buzzerButtonColorReady,
                         buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                        path = path
                     )
                 ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            unsafe { +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }
+                            unsafe { +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}${path}', '$lobbyCode'); };" }
                         }
                     }
 
@@ -286,7 +293,7 @@ fun Application.configure(
 
                     footerContent {
                         div(classes = "right-aligned") {
-                            a(href = "/monitor/$lobbyCode", target = "_blank") { +"Buzzes Overlay Link" }
+                            a(href = "${path}monitor/$lobbyCode", target = "_blank") { +"Buzzes Overlay Link" }
                         }
                     }
                 }
@@ -305,11 +312,12 @@ fun Application.configure(
                         formButtonColor = formButtonColor,
                         buzzerButtonColorReady = buzzerButtonColorReady,
                         buzzerButtonColorBuzzed = buzzerButtonColorBuzzed,
+                        path = path
                     )
                 ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            unsafe { +"window.onload = function() { monitor('${if (isSecure) "wss" else "ws"}://${publicHostname}', '$lobbyCode'); };" }
+                            unsafe { +"window.onload = function() { monitor('${if (isSecure) "wss" else "ws"}://${publicHostname}${path}', '$lobbyCode'); };" }
                         }
                     }
 

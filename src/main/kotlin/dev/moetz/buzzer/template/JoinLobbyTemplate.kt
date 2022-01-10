@@ -4,12 +4,13 @@ import io.ktor.html.*
 import kotlinx.html.*
 
 class JoinLobbyTemplate(
-    private val lobbyCode: String?
+    private val lobbyCode: String?,
+    private val path: String
 ) : Template<FlowContent> {
     override fun FlowContent.apply() {
         if (lobbyCode == null) {
             div(classes = "centered") {
-                form(action = "/join", method = FormMethod.post) {
+                form(action = "${path}join", method = FormMethod.post) {
                     br()
                     span(classes = "centered-text") { +"Join a Lobby:" }
                     br()
@@ -31,7 +32,7 @@ class JoinLobbyTemplate(
             }
         } else {
             div(classes = "centered") {
-                form(action = "/join", method = FormMethod.post) {
+                form(action = "${path}join", method = FormMethod.post) {
                     +"Enter a nickname to join the lobby:"
                     br()
                     textInput(name = "nickname", classes = "form-input centered") {

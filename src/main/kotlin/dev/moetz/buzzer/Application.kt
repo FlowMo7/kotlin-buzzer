@@ -23,6 +23,18 @@ fun main() {
 
     val isSecure = System.getenv("IS_SECURE")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: false
     val publicHostname = System.getenv("DOMAIN")?.takeIf { it.isNotBlank() } ?: "localhost:8080"
+    val path = System.getenv("SUB_PATH")?.takeIf { it.isNotBlank() }
+        ?.let { path ->
+            buildString {
+                if (path.startsWith('/').not()) {
+                    append('/')
+                }
+                append(path)
+                if (path.endsWith('/').not()) {
+                    append('/')
+                }
+            }
+        } ?: "/"
     val debugLogsEnabled = System.getenv("ENABLE_DEBUG_LOGS")?.takeIf { it.isNotBlank() }?.toBooleanStrict() ?: true
 
     val formButtonColor = System.getenv("COLOR_FORM_BUTTON")?.takeIf { it.isNotBlank() } ?: "#161D99"
@@ -82,6 +94,7 @@ fun main() {
         configure(
             buzzingSessionManager = buzzingSessionManager,
             publicHostname = publicHostname,
+            path = path,
             isSecure = isSecure,
             formButtonColor = formButtonColor,
             buzzerButtonColorReady = buzzerButtonColorReady,
@@ -89,6 +102,7 @@ fun main() {
         )
         configureMeta(
             formButtonColor = formButtonColor,
+            path = path
         )
         configureStatic()
         configureWebSocket(

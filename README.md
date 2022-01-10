@@ -16,12 +16,13 @@ The docker image can be found here: [hub.docker.com/r/flowmo7/kotlin-buzzer](htt
 Possible environment variables:
 
 * `DOMAIN`: The domain this application is available at, e.g. `buzzer.example.org`
+* `PATH`: When this application is served on a sub-path (not directly on the given domain, by e.g. a reverse proxy), you need to set the path here. Defaults to ``.
 * `IS_SECURE`: Whether this application is available as HTTPS / behind an HTTPS reverse proxy (which it should be). Default to `true`.
 * `ENABLE_DEBUG_LOGS`: Whether the application (server-side) should output a bit more information, and also print the buzz log to stdout. Defaults to `false`.
 * `COLOR_FORM_BUTTON`: The color of the buttons before joining a lobby (on the index page). Defaults to `#161D99`.
 * `COLOR_BUZZER_BUTTON_READY`: The color of the buzzer button. Defaults to `limegreen`.
 * `COLOR_BUZZER_BUTTON_BUZZED`: The color of the buzzer button when already buzzed. Defaults to `cornflowerblue`.
-* `DEFAULT_LOBBY_CODE_LENGTH`: The length of the generated ([0-9a-f], lower-cased) lobby codes. Defaults to `6`.
+* `DEFAULT_LOBBY_CODE_LENGTH`: The length of the generated (`[0-9a-f]`, lower-cased) lobby codes. Defaults to `6`.
 
 ### Example docker-compose.yml
 

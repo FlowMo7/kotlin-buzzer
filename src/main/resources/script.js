@@ -41,7 +41,7 @@ function buildBuzzesList(participants) {
 
 function host(pathPrefix, lobbyCode) {
     connectToWebsocket(
-        pathPrefix + '/ws/host/' + lobbyCode + '?secret=' + getParameterByName('secret'),
+        pathPrefix + 'ws/host/' + lobbyCode + '?secret=' + getParameterByName('secret'),
         function (data) {
             let payload = JSON.parse(data);
             document.getElementById('participant_count').innerHTML = payload.participants.length;
@@ -60,7 +60,7 @@ function host(pathPrefix, lobbyCode) {
 
 function monitor(pathPrefix, lobbyCode) {
     connectToWebsocket(
-        pathPrefix + '/ws/monitor/' + lobbyCode,
+        pathPrefix + 'ws/monitor/' + lobbyCode,
         function (data) {
             let payload = JSON.parse(data);
             document.getElementById('buzzes_list').innerHTML = buildBuzzesList(payload.participants);
@@ -78,7 +78,7 @@ function monitor(pathPrefix, lobbyCode) {
 function participant(pathPrefix, lobbyCode) {
     let nickname = getParameterByName('nickname');
     connectToWebsocket(
-        pathPrefix + '/ws/feed/' + lobbyCode + '?nickname=' + nickname,
+        pathPrefix + 'ws/feed/' + lobbyCode + '?nickname=' + nickname,
         function (data) {
             let payload = JSON.parse(data);
             payload.participants.forEach(function (participantState) {
