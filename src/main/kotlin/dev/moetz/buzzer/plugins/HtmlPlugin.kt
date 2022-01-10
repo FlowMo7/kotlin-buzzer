@@ -160,7 +160,7 @@ fun Application.configure(
                 ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            unsafe { +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}://${publicHostname}${path}', '$lobbyCode'); };" }
+                            unsafe { +"window.onload = function() { participant('${if (isSecure) "wss" else "ws"}', '${publicHostname}', '${path}', '$lobbyCode'); };" }
                         }
                     }
 
@@ -237,7 +237,7 @@ fun Application.configure(
                 ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            unsafe { +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}://${publicHostname}${path}', '$lobbyCode'); };" }
+                            unsafe { +"window.onload = function() { host('${if (isSecure) "wss" else "ws"}', '${publicHostname}', '${path}', '$lobbyCode'); };" }
                         }
                     }
 
@@ -317,7 +317,7 @@ fun Application.configure(
                 ) {
                     additionalHeadStuff {
                         script(type = "text/javascript") {
-                            unsafe { +"window.onload = function() { monitor('${if (isSecure) "wss" else "ws"}://${publicHostname}${path}', '$lobbyCode'); };" }
+                            unsafe { +"window.onload = function() { monitor('${if (isSecure) "wss" else "ws"}', '${publicHostname}', '${path}', '$lobbyCode'); };" }
                         }
                     }
 
