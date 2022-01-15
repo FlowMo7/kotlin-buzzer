@@ -4,8 +4,12 @@
 
 An online buzzing system for your browser implemented in KTor / Kotlin using websockets.
 
+![drawing](screenshots/host_two_buzzed.png)
+
 This service provides a buzzing system with different lobbies with unlimited participants to join and a host to have an 
 overview on who buzzed first, and to reset the buzzers remotely.
+
+![drawing](screenshots/participant_not_buzzed.png)
 
 This is the source-code of [buzzer.moetz.dev](https://buzzer.moetz.dev).
 
