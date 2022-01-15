@@ -19,13 +19,15 @@ class QrCodeManager {
         )
 
         val image = BufferedImage(matrix.width, matrix.height, BufferedImage.TYPE_INT_RGB).apply {
-            graphics.color = Color.WHITE
-            graphics.fillRect(0, 0, matrix.width, matrix.height)
-            graphics.color = Color.BLACK
-            (0 until matrix.height).forEach { y ->
-                (0 until matrix.width).forEach { x ->
-                    if (matrix.get(x, y)) {
-                        graphics.fillRect(x, y, 1, 1)
+            graphics.apply {
+                color = Color.WHITE
+                fillRect(0, 0, matrix.width, matrix.height)
+                color = Color.BLACK
+                (0 until matrix.height).forEach { y ->
+                    (0 until matrix.width).forEach { x ->
+                        if (matrix.get(x, y)) {
+                            fillRect(x, y, 1, 1)
+                        }
                     }
                 }
             }
