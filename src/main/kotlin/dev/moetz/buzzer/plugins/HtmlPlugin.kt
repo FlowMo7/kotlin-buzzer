@@ -176,7 +176,6 @@ fun Application.configure(
                                 id = "connection_status"
                                 style = "color: red;"
                             }
-                            br()
 
                             p {
                                 +"Your nickname:"
