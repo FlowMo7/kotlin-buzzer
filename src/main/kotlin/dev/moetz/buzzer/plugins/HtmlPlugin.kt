@@ -255,7 +255,7 @@ fun Application.configure(
                             }
 
                             div {
-                                +"Link to share to join this lobby:"
+                                +"Link to join this lobby:"
                                 br()
                                 a(href = lobbyJoinUrl, target = "_blank") { +lobbyJoinUrl }
                                 unsafe { +"&nbsp;" }
