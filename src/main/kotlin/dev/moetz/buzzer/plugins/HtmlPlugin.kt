@@ -142,7 +142,7 @@ fun Application.configure(
         }
 
         get("lobby/{lobbyCode}") {
-            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyId not set in path" }
+            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyCode not set in path" }
             val nickname =
                 requireNotNull(call.request.queryParameters["nickname"]) { "nickname not set in query parameters" }
 
