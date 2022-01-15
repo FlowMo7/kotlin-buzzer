@@ -1,6 +1,7 @@
 package dev.moetz.buzzer.plugins
 
 import dev.moetz.buzzer.manager.BuzzingSessionManager
+import dev.moetz.buzzer.qr.QrCodeManager
 import dev.moetz.buzzer.template.CreateLobbyTemplate
 import dev.moetz.buzzer.template.InfoSiteTemplate
 import dev.moetz.buzzer.template.JoinLobbyTemplate
@@ -15,6 +16,7 @@ import kotlinx.html.*
 
 fun Application.configure(
     buzzingSessionManager: BuzzingSessionManager,
+    qrCodeManager: QrCodeManager,
     publicHostname: String,
     path: String,
     isSecure: Boolean,
@@ -256,6 +258,10 @@ fun Application.configure(
                                 +"Link to share to join this lobby:"
                                 br()
                                 a(href = lobbyJoinUrl, target = "_blank") { +lobbyJoinUrl }
+                                unsafe { +"&nbsp;" }
+                                +"("
+                                a(href = "${path}qr/$lobbyCode", target = "_blank") { +"QR-Code" }
+                                +")"
                             }
 
                             div {
@@ -338,6 +344,34 @@ fun Application.configure(
                     }
                 }
             }
+        }
+
+        get("qr/{lobbyCode}") {
+            val lobbyCode = requireNotNull(call.parameters["lobbyCode"]) { "lobbyCode not set in path" }
+            if (buzzingSessionManager.isValidLobbyCode(lobbyCode).not()) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid lobbyCode characters")
+            } else {
+                call.respondOutputStream(contentType = ContentType.Image.PNG, status = HttpStatusCode.OK) {
+                    val lobbyJoinUrl = buildString {
+                        if (isSecure) {
+                            append("https://")
+                        } else {
+                            append("http://")
+                        }
+                        append(publicHostname)
+                        append(path)
+                        append("join/$lobbyCode")
+                    }
+
+                    qrCodeManager.generateQRCode(
+                        content = lobbyJoinUrl,
+                        width = 512,
+                        height = 512,
+                        outputStream = this
+                    )
+                }
+            }
+
         }
 
     }

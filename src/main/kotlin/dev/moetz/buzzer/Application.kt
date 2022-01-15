@@ -7,6 +7,7 @@ import dev.moetz.buzzer.plugins.configure
 import dev.moetz.buzzer.plugins.configureMeta
 import dev.moetz.buzzer.plugins.configureStatic
 import dev.moetz.buzzer.plugins.configureWebSocket
+import dev.moetz.buzzer.qr.QrCodeManager
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -47,6 +48,8 @@ fun main() {
     val buzzLogging = BuzzLogging(
         enabled = debugLogsEnabled
     )
+
+    val qrCodeManager = QrCodeManager()
 
     val connectionCountManager = ConnectionCountManager()
 
@@ -93,6 +96,7 @@ fun main() {
 
         configure(
             buzzingSessionManager = buzzingSessionManager,
+            qrCodeManager = qrCodeManager,
             publicHostname = publicHostname,
             path = path,
             isSecure = isSecure,
