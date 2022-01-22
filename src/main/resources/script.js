@@ -103,6 +103,8 @@ function participant(scheme, hostname, path, lobbyCode) {
             }
         }
     );
+    preloadImage(path + 'icon/buzzer.svg');
+    preloadImage(path + 'icon/buzzer_buzzed.png');
 }
 
 function sendBuzz() {
@@ -151,4 +153,9 @@ function getMilliseconds(date) {
     } else {
         return Math.round(parseInt(split[1]));
     }
+}
+
+function preloadImage(imageUrl) {
+    let img = new Image();
+    img.src = imageUrl;
 }
