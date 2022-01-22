@@ -10,7 +10,8 @@ import java.util.*
 class BuzzingSessionManager(
     private val buzzLogging: BuzzLogging,
     connectionCountManager: ConnectionCountManager,
-    private val lobbyCodeLength: Int
+    private val lobbyCodeLength: Int,
+    private val hostPasswordLength: Int,
 ) {
 
     data class BuzzingSessionData(
@@ -78,7 +79,7 @@ class BuzzingSessionManager(
                 id = generateRandomString(lobbyCodeLength)
             } while (buzzingSateMap.containsKey(id))
 
-            val hostPassword = generateRandomString(6)
+            val hostPassword = generateRandomString(hostPasswordLength)
 
             MutableStateFlow(
                 BuzzingSessionData(

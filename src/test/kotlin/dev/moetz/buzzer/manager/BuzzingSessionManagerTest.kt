@@ -24,7 +24,8 @@ class BuzzingSessionManagerTest {
         buzzingSessionManager = BuzzingSessionManager(
             buzzLogging = buzzLogging,
             connectionCountManager =connectionCountManager,
-            lobbyCodeLength = 6
+            lobbyCodeLength = 6,
+            hostPasswordLength = 8
         )
     }
 

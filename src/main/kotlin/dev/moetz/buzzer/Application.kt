@@ -43,6 +43,7 @@ fun main() {
     val buzzerButtonColorBuzzed =
         System.getenv("COLOR_BUZZER_BUTTON_BUZZED")?.takeIf { it.isNotBlank() } ?: "cornflowerblue"
     val lobbyCodeLength = System.getenv("DEFAULT_LOBBY_CODE_LENGTH")?.takeIf { it.isNotBlank() }?.toInt() ?: 6
+    val hostPasswordLength = System.getenv("DEFAULT_HOST_PASSWORD_LENGTH")?.takeIf { it.isNotBlank() }?.toInt() ?: 8
 
 
     val buzzLogging = BuzzLogging(
@@ -56,7 +57,8 @@ fun main() {
     val buzzingSessionManager = BuzzingSessionManager(
         buzzLogging = buzzLogging,
         connectionCountManager = connectionCountManager,
-        lobbyCodeLength = lobbyCodeLength
+        lobbyCodeLength = lobbyCodeLength,
+        hostPasswordLength = hostPasswordLength,
     )
 
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
