@@ -18,7 +18,7 @@ class SiteTemplate(
     val additionalHeadStuff = Placeholder<HEAD>()
 
     override fun HTML.apply() {
-        comment("This service is open sourced at https://github.com/FlowMo7/kotlin-buzzer.")
+        comment(" This service is open sourced at https://github.com/FlowMo7/kotlin-buzzer. ")
         head {
             meta(charset = "utf-8")
             title { +siteTitle }
