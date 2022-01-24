@@ -74,7 +74,12 @@ fun Application.configure(
                         h2 { +"Information" }
                     }
 
-                    insert(InfoSiteTemplate()) {
+                    insert(
+                        InfoSiteTemplate(
+                            buzzerButtonColorReady = buzzerButtonColorReady,
+                            buzzerButtonColorBuzzed = buzzerButtonColorBuzzed
+                        )
+                    ) {
 
                     }
                 }
@@ -327,7 +332,7 @@ fun Application.configure(
                     }
 
                     content {
-                        div(classes = "centered centered-text") {
+                        div(classes = "monitor-container") {
 
                             span {
                                 id = "connection_status"

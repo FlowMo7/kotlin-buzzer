@@ -9,7 +9,7 @@ class InfoSiteItem : Template<FlowContent> {
     val content = Placeholder<FlowContent>()
 
     override fun FlowContent.apply() {
-        div(classes = "centered") {
+        div(classes = "info-item") {
             h4 { insert(titlePlaceholder) }
 
             div {

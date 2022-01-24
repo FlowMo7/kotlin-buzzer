@@ -117,3 +117,14 @@ a:hover, a:visited, a:link, a:active {
     text-align: right;
     font-size: 0.75em;
 }
+
+.monitor-container {
+    max-width: 400px;
+}
+
+.info-item {
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
